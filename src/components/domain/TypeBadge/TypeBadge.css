@@ -1,0 +1,11 @@
+.type-badge {
+  width: 45px;
+  padding: 0px 4px;
+  border-radius: 5px;
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}

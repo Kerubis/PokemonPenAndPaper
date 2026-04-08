@@ -1,0 +1,19 @@
+.home-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.home-page h1 {
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.home-page p {
+  font-size: 1.2rem;
+  color: #cccccc;
+  line-height: 1.6;
+}

@@ -1,0 +1,66 @@
+.character-card {
+    padding: 10px 12px;
+    background-color: #4a4a4a;
+    border: 2px solid #5a5a5a;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 250px;
+}
+
+.character-card:hover {
+    background-color: #5a5a5a;
+    border-color: #6a6a6a;
+}
+
+.character-card.active {
+    background-color: #5a5a5a;
+    border-color: #6c9bd2;
+}
+
+.character-card-row-1 {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.character-card-name {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.character-card-divider {
+    color: #808080;
+    font-weight: 400;
+}
+
+.character-card-pokemon-name {
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.character-card-level {
+    color: #b0b0b0;
+    font-size: 0.75rem;
+    margin-left: 3px;
+    font-weight: 500;
+}
+
+.character-card-row-2 {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+    align-items: center;
+}
+
+.character-card-hp {
+    color: #e0e0e0;
+    font-size: 0.75rem;
+    font-weight: 500;
+}

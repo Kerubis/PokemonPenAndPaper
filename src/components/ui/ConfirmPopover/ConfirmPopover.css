@@ -1,0 +1,51 @@
+.confirm-popover {
+  position: fixed;
+  z-index: 1000;
+  background-color: #3a3a3a;
+  border: 1px solid #5a5a5a;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  min-width: 180px;
+}
+
+.confirm-popover p {
+  margin: 0 0 10px 0;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.confirm-popover-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.confirm-popover-buttons button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.confirm-popover-cancel {
+  background-color: #5a5a5a;
+  color: #ffffff;
+}
+
+.confirm-popover-cancel:hover {
+  background-color: #6a6a6a;
+}
+
+.confirm-popover-confirm {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
+.confirm-popover-confirm:hover {
+  background-color: #c0392b;
+}

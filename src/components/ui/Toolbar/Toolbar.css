@@ -1,0 +1,25 @@
+/* Toolbar Container */
+.toolbar {
+  padding: 10px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background-color: #3a3a3a;
+  border-bottom: 1px solid #5a5a5a;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}

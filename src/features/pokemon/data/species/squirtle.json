@@ -1,0 +1,12 @@
+{
+  "pokedexEntry": 7,
+  "pokemonName": "Squirtle",
+  "type1": "Water",
+  "type2": null,
+  "flaw": "Pollinosis",
+  "strength": "Strengthened by natural water",
+  "abilityUnlocks": [
+    { "ability": "Tackle", "level": 1 },
+    { "ability": "TailWhip", "level": 1 }
+  ]
+}

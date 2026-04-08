@@ -1,0 +1,43 @@
+.encounter-card {
+  padding: 12px;
+  background-color: #3a3a3a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.encounter-card:hover {
+  background-color: #424242;
+  border-color: #555555;
+}
+
+.encounter-card.active {
+  background-color: #4a4a4a;
+  border-color: #6b9bd1;
+}
+
+.encounter-card-header {
+  margin-bottom: 8px;
+}
+
+.encounter-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.encounter-card-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.encounter-card-pokemon-count {
+  font-size: 0.875rem;
+  color: #aaaaaa;
+}

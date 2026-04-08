@@ -1,0 +1,28 @@
+.border-box {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.border-box-label {
+    position: absolute;
+    top: -7px;
+    left: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    background-color: #ffffff;
+    padding: 0 4px;
+    line-height: 1;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.border-box-content {
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px;
+    padding-top: 12px;
+    box-sizing: border-box;
+}

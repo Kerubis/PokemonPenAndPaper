@@ -1,0 +1,14 @@
+.encounter-toolbar {
+  /* Add any specific styles here */
+}
+
+.encounter-toolbar-battle-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4caf7d;
+  background: #1e3a2e;
+  border: 1px solid #3a6a58;
+  border-radius: 4px;
+  padding: 4px 10px;
+  letter-spacing: 0.03em;
+}

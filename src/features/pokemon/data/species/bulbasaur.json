@@ -1,0 +1,12 @@
+{
+  "pokedexEntry": 1,
+  "pokemonName": "Bulbasaur",
+  "type1": "Grass",
+  "type2": "Poison",
+  "flaw": "Weakened by natural fire sources",
+  "strength": "Strengthened by vegetation",
+  "abilityUnlocks": [
+    { "ability": "Tackle", "level": 1 },
+    { "ability": "Constrict", "level": 1 }
+  ]
+}

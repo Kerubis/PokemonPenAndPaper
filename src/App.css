@@ -1,0 +1,141 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-content {
+  flex: 1;
+  overflow: auto;
+  background-color: #454545;
+}
+
+.home-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+}
+
+.home-view h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.home-view p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.saved-characters-panel {
+  background-color: #2c2c2c;
+  border-bottom: 1px solid #4c4c4c;
+  padding: 15px 20px;
+}
+
+.saved-characters-panel h3 {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.saved-characters-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 5px 0;
+}
+
+.saved-character-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: #3c3c3c;
+  border: 2px solid #4c4c4c;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.saved-character-item:hover {
+  background-color: #4c4c4c;
+  border-color: #5c5c5c;
+}
+
+.saved-character-item.active {
+  background-color: #4c4c4c;
+  border-color: #6c9bd2;
+}
+
+.saved-character-info {
+  flex: 1;
+}
+
+.saved-character-name {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.saved-character-details {
+  color: #a0a0a0;
+  font-size: 0.75rem;
+}
+
+.delete-character-button {
+  background-color: transparent;
+  border: none;
+  color: #a0a0a0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-character-button:hover {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
+.delete-character-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  .app-menu {
+    display: none !important;
+  }
+  
+  .app-container {
+    display: block;
+    height: auto;
+  }
+  
+  .app-content {
+    overflow: visible;
+    background-color: white;
+  }
+  
+  .character-sheet {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}

@@ -1,0 +1,32 @@
+/* Button Styles */
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #4a4a4a;
+  color: #ffffff;
+  border: 1px solid #5a5a5a;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #5a5a5a;
+  border-color: #6a6a6a;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #4a4a4a;
+  border-color: #5a5a5a;
+}
+
+.button svg {
+  width: 20px;
+  height: 20px;
+}

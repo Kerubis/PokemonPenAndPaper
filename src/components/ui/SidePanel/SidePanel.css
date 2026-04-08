@@ -1,0 +1,39 @@
+/* Side Panel Container */
+.side-panel {
+  min-width: 280px;
+  max-width: fit-content;
+  background-color: #3a3a3a;
+  border-right: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.side-panel-title {
+  margin: 0;
+  padding: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #e0e0e0;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+.side-panel-content {
+  padding: 15px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Variant: No padding for content (useful for lists) */
+.side-panel-no-padding .side-panel-content {
+  padding: 0;
+}
+
+/* Variant: Custom padding for content */
+.side-panel-compact .side-panel-content {
+  padding: 12px;
+}

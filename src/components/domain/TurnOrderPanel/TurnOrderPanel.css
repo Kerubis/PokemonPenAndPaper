@@ -1,0 +1,432 @@
+.turn-order-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background-color: #2e2e2e;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+    color: #e0e0e0;
+}
+
+/* Header */
+.turn-order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.turn-order-round {
+    font-weight: 700;
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 0.03em;
+}
+
+.turn-order-controls {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.turn-order-btn {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #e0e0e0;
+    border-radius: 4px;
+    padding: 3px 9px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    transition: background 0.15s;
+}
+
+.turn-order-btn:hover {
+    background: #4a4a4a;
+}
+
+.turn-order-btn--end {
+    background: #5a2a2a;
+    border-color: #7a3a3a;
+    color: #ffaaaa;
+    font-size: 12px;
+    padding: 3px 10px;
+}
+
+.turn-order-btn--end:hover {
+    background: #7a3a3a;
+}
+
+/* Pre-battle empty state */
+.turn-order-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 13px;
+    text-align: center;
+}
+
+.turn-order-start-btn {
+    background: #1e3a2e;
+    border: 1px solid #3a6a58;
+    color: #90d888;
+    border-radius: 4px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.turn-order-start-btn:hover {
+    background: #2a4a3e;
+}
+
+.turn-order-start-btn:disabled {
+    background: #2a2a2a;
+    border-color: #3a3a3a;
+    color: #555;
+    cursor: default;
+}
+
+.turn-order-initiative--preview {
+    cursor: default;
+    color: #888;
+    border-color: #3a3a3a;
+}
+
+/* Global effects */
+.turn-order-global-effects {
+    padding: 8px 12px;
+    border-bottom: 1px solid #3a3a3a;
+    background-color: #272727;
+}
+
+.turn-order-section-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.turn-order-no-effects {
+    color: #555;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Entries list */
+.turn-order-entries {
+    display: flex;
+    flex-direction: column;
+}
+
+.turn-order-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    transition: background 0.15s;
+}
+
+.turn-order-entry:last-child {
+    border-bottom: none;
+}
+
+.turn-order-entry:hover {
+    background-color: #353535;
+}
+
+.turn-order-entry--active {
+    background-color: #1e3a2e !important;
+    border-left: 3px solid #4caf7d;
+}
+
+.turn-order-position {
+    width: 18px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: #777;
+    flex-shrink: 0;
+    padding-top: 6px;
+}
+
+.turn-order-entry--active .turn-order-position {
+    color: #4caf7d;
+}
+
+/* Let CharacterCard fill the available width */
+.turn-order-entry-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.turn-order-entry-info .character-card {
+    margin: 0;
+}
+
+/* Effects column shown to the right of the card */
+.turn-order-entry-effects {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    justify-content: center;
+    flex-shrink: 0;
+    max-width: 120px;
+}
+
+/* Initiative */
+.turn-order-initiative-area {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    padding-top: 4px;
+}
+
+.turn-order-initiative {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #b0d0ff;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-width: 38px;
+    text-align: center;
+}
+
+.turn-order-initiative:hover {
+    background: #4a4a4a;
+}
+
+.turn-order-initiative--overridden {
+    border-color: #f0a030;
+    color: #f0c060;
+}
+
+.turn-order-override-marker {
+    font-size: 10px;
+    margin-left: 1px;
+    opacity: 0.8;
+}
+
+.turn-order-initiative-input {
+    width: 60px;
+    background: #1e1e1e;
+    border: 1px solid #6b9bd1;
+    color: #b0d0ff;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.turn-order-clear-override {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    transition: color 0.15s;
+}
+
+.turn-order-clear-override:hover {
+    color: #ffaaaa;
+}
+
+.turn-order-clear-override svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Add effect button */
+.turn-order-add-effect-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+
+.turn-order-entry .turn-order-add-effect-btn {
+    align-items: flex-start;
+    padding-top: 6px;
+}
+
+.turn-order-add-effect-btn:hover {
+    color: #4caf7d;
+}
+
+.turn-order-add-effect-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Effect chips */
+.turn-order-effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.turn-order-effect-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #3a3550;
+    border: 1px solid #5a5080;
+    color: #c8b8f0;
+    border-radius: 10px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.turn-order-effect-chip--persistent {
+    background: #2a3a28;
+    border-color: #3a6a38;
+    color: #90d888;
+}
+
+.turn-order-effect-chip--clickable {
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.turn-order-effect-chip--clickable:hover {
+    background: #534d78;
+    border-color: #7a70b0;
+}
+
+.turn-order-effect-rounds {
+    background: #5a5080;
+    border-radius: 8px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #e0d0ff;
+}
+
+.turn-order-effect-remove {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+}
+
+.turn-order-effect-remove:hover {
+    color: #ffaaaa;
+}
+
+.turn-order-effect-remove svg {
+    width: 10px;
+    height: 10px;
+}
+
+/* Add effect form */
+.turn-order-add-effect-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: #1e1e1e;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.turn-order-effect-input {
+    background: #2e2e2e;
+    border: 1px solid #4a4a4a;
+    color: #e0e0e0;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.turn-order-effect-input:focus {
+    outline: none;
+    border-color: #6b9bd1;
+}
+
+.turn-order-effect-input--short {
+    width: 60px;
+}
+
+.turn-order-effect-form-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.turn-order-effect-label {
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+}
+
+.turn-order-effect-hint {
+    font-size: 11px;
+    color: #555;
+}
+
+.turn-order-effect-form-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.turn-order-effect-btn {
+    background: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    color: #e0e0e0;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.turn-order-effect-btn:hover {
+    background: #4a4a4a;
+}
+
+.turn-order-effect-btn--confirm {
+    background: #1e3a2e;
+    border-color: #3a6a58;
+    color: #90d888;
+}
+
+.turn-order-effect-btn--confirm:hover {
+    background: #2a4a3e;
+}

@@ -1,0 +1,51 @@
+/* Character List Specific Styles */
+.character-list-panel .side-panel-content {
+  padding: 12px;
+}
+
+.character-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.character-list-item-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.character-list-item {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.character-list-item.active {
+  /* Active state styling can be customized by child content */
+}
+
+.character-list-delete-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  color: #a0a0a0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.character-list-delete-button:hover {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
+.character-list-delete-button svg {
+  width: 16px;
+  height: 16px;
+}
