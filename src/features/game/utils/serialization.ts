@@ -57,7 +57,8 @@ export function serializePokemon(pokemon: Pokemon): SerializedPokemon {
     specialDefense: pokemon.specialDefense,
     speed: pokemon.speed,
     isPlayerCharacter: pokemon.isPlayerCharacter,
-    abilities: pokemon.abilities.map(serializeAbility)
+    abilities: pokemon.abilities.map(serializeAbility),
+    index: pokemon.index
   };
 }
 
@@ -79,7 +80,8 @@ export function deserializePokemon(data: SerializedPokemon): Pokemon {
     specialDefense: data.specialDefense,
     speed: data.speed,
     abilities: data.abilities.map(deserializeAbility),
-    isPlayerCharacter: data.isPlayerCharacter
+    isPlayerCharacter: data.isPlayerCharacter,
+    index: data.index ?? 0
   });
 
   if (!pokemon) {

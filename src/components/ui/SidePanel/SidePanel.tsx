@@ -2,7 +2,7 @@ import React from 'react';
 import './SidePanel.css';
 
 interface SidePanelProps {
-  title: string;
+  title: string | React.ReactNode;
   children: React.ReactNode;
   className?: string;
   width?: string;

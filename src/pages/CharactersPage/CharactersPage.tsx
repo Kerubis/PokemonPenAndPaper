@@ -55,7 +55,8 @@ export const CharactersPage: React.FC = () => {
       defense: 0,
       specialDefense: 0,
       speed: 0,
-      isPlayerCharacter: true
+      isPlayerCharacter: true,
+      index: characters.length
     });
 
     if (newPokemon) {
@@ -72,6 +73,18 @@ export const CharactersPage: React.FC = () => {
   // Handle character selection
   const handleSelectCharacter = (id: string) => {
     navigate(`/Characters/${id}`);
+  };
+
+  // Handle reordering characters via DnD
+  const handleReorderCharacters = (orderedIds: string[]) => {
+    setCharacters(prev => {
+      const updated = [...prev];
+      orderedIds.forEach((id, idx) => {
+        const char = updated.find(c => c.id === id);
+        if (char) char.setIndex(idx);
+      });
+      return updated.sort((a, b) => a.index - b.index);
+    });
   };
 
   // Handle delete character
@@ -382,8 +395,10 @@ export const CharactersPage: React.FC = () => {
     },
   ] : [];
 
-  // Build character list items
-  const characterListItems = characters.map(character => ({
+  // Build character list items (sorted by index)
+  const characterListItems = [...characters]
+    .sort((a, b) => a.index - b.index)
+    .map(character => ({
     id: character.id,
     content: (
       <CharacterCard
@@ -415,6 +430,7 @@ export const CharactersPage: React.FC = () => {
           currentItemId={selectedCharacterId}
           onItemClick={handleSelectCharacter}
           onDeleteClick={handleDeleteCharacter}
+          onReorder={handleReorderCharacters}
         />
 
         <div className="characters-page-main">

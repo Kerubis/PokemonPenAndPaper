@@ -1,7 +1,8 @@
 import React from 'react';
 import { SidePanel } from '@/components/ui/SidePanel';
 import { Dropdown, type DropdownItem } from '@/components/ui/Dropdown';
-import { MinusIcon, PlusIcon, TrashIcon, ChevronDownIcon } from '@/components/ui/icons';
+import { TrashIcon, ChevronDownIcon } from '@/components/ui/icons';
+import { PropertyFieldGroup } from '@/components/ui/PropertyField';
 import './EncounterSidePanel.css';
 
 function getYouTubeEmbedUrl(url: string): string | null {
@@ -30,13 +31,9 @@ function getYouTubeEmbedUrl(url: string): string | null {
   }
 }
 
-export interface EncounterPropertyField {
-  label: string;
-  type: 'text' | 'number' | 'textarea' | 'checkbox';
-  value: string | number | boolean;
-  onChange: (value: string | boolean) => void;
-  options?: { min?: number; max?: number; rows?: number };
-}
+import type { PropertyField } from '@/components/ui/PropertyField';
+
+export type EncounterPropertyField = PropertyField;
 
 interface EncounterSidePanelProps {
   fields: EncounterPropertyField[];
@@ -61,75 +58,13 @@ export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, 
     </>
   );
 
-  const renderField = (field: EncounterPropertyField, index: number) => (
-    <div key={index} className="encounter-property-group">
-      <label className="encounter-property-label">{field.label}</label>
-      {field.type === 'checkbox' ? (
-        <label className="encounter-property-checkbox-wrapper">
-          <input
-            type="checkbox"
-            checked={field.value as boolean}
-            onChange={(e) => field.onChange(e.target.checked)}
-            className="encounter-property-checkbox"
-          />
-          <span className="encounter-property-checkbox-label">
-            {field.value ? 'Yes' : 'No'}
-          </span>
-        </label>
-      ) : field.type === 'textarea' ? (
-        <textarea
-          className="encounter-property-input encounter-property-textarea"
-          value={field.value as string}
-          onChange={(e) => field.onChange(e.target.value)}
-          rows={field.options?.rows || 2}
-        />
-      ) : field.type === 'number' ? (
-        <div className="encounter-property-number-wrapper">
-          <button
-            className="encounter-property-number-button"
-            onClick={() => {
-              const numValue = typeof field.value === 'number' ? field.value : parseInt(field.value as string) || 0;
-              const newValue = Math.max(field.options?.min ?? 0, numValue - 1);
-              field.onChange(newValue.toString());
-            }}
-          >
-            <MinusIcon />
-          </button>
-          <input
-            type="number"
-            className="encounter-property-input"
-            min={field.options?.min}
-            max={field.options?.max}
-            value={field.value as number}
-            onChange={(e) => field.onChange(e.target.value)}
-          />
-          <button
-            className="encounter-property-number-button increase"
-            onClick={() => {
-              const numValue = typeof field.value === 'number' ? field.value : parseInt(field.value as string) || 0;
-              const newValue = field.options?.max !== undefined ? Math.min(field.options.max, numValue + 1) : numValue + 1;
-              field.onChange(newValue.toString());
-            }}
-          >
-            <PlusIcon />
-          </button>
-        </div>
-      ) : (
-        <input
-          type={field.type}
-          className="encounter-property-input"
-          value={field.value as string}
-          onChange={(e) => field.onChange(e.target.value)}
-        />
-      )}
-    </div>
-  );
-
   const embedUrl = musicLink ? getYouTubeEmbedUrl(musicLink) : null;
 
   return (
     <SidePanel title="Encounter" className="encounter-side-panel">
-      {fields.map((field, index) => renderField(field, index))}
+      {fields.map((field, index) => (
+        <PropertyFieldGroup key={index} field={field} />
+      ))}
 
       {onAddPokemon && (
         <div className="encounter-property-group">

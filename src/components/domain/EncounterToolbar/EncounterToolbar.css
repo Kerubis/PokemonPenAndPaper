@@ -1,5 +1,19 @@
-.encounter-toolbar {
-  /* Add any specific styles here */
+.encounter-toolbar-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.encounter-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
 }
 
 .encounter-toolbar-battle-indicator {
@@ -11,4 +25,106 @@
   border-radius: 4px;
   padding: 4px 10px;
   letter-spacing: 0.03em;
+}
+
+.encounter-toolbar-list {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
+}
+
+.encounter-toolbar-list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.encounter-toolbar-list::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 2px;
+}
+
+.encounter-toolbar-box {
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  background: #3a3a3a;
+  border: 2px solid #555555;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+  transition: background 0.15s, border-color 0.15s;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.encounter-toolbar-box:hover {
+  background: #424242;
+  border-color: #777;
+}
+
+.encounter-toolbar-box--active {
+  background: #4a4a4a;
+  border-color: #6b9bd1;
+}
+
+.encounter-toolbar-box--finished {
+  border-color: #444;
+}
+
+.encounter-toolbar-box--finished .encounter-toolbar-box-name {
+  color: #777;
+}
+
+.encounter-toolbar-box-name {
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.encounter-toolbar-box--new {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: #666;
+  color: #aaa;
+  box-sizing: border-box;
+}
+
+.encounter-toolbar-box--new:hover {
+  border-color: #aaa;
+  color: #fff;
+  background: #3a3a3a;
+}
+
+.encounter-toolbar-box--new svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.encounter-toolbar-box-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #4caf7d;
+  background: #1e3a2e;
+  border: 1px solid #3a6a58;
+  border-radius: 3px;
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }

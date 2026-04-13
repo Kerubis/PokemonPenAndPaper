@@ -1,13 +1,29 @@
 import React from 'react';
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { restrictToHorizontalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
+import { CSS } from '@dnd-kit/utilities';
 import { Toolbar } from '@/components/ui/Toolbar';
-import { Button } from '@/components/ui/Button';
-import { Dropdown } from '@/components/ui/Dropdown';
-import { PlusIcon, ChevronDownIcon } from '@/components/ui/icons';
+import { PlusIcon } from '@/components/ui/icons';
 import './EncounterToolbar.css';
 
 interface EncounterItem {
   id: string;
   name: string;
+  index: number;
+  finished: boolean;
 }
 
 interface EncounterToolbarProps {
@@ -15,41 +31,95 @@ interface EncounterToolbarProps {
   encounters?: EncounterItem[];
   selectedEncounterId?: string | null;
   onSelectEncounter?: (id: string) => void;
-  battleActive?: boolean;
+  onReorder?: (orderedIds: string[]) => void;
 }
+
+interface SortableBoxProps {
+  encounter: EncounterItem;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+const SortableBox: React.FC<SortableBoxProps> = ({ encounter, isSelected, onSelect }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: encounter.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    zIndex: isDragging ? 999 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`encounter-toolbar-box${
+        isSelected ? ' encounter-toolbar-box--active' : ''
+      }${encounter.finished ? ' encounter-toolbar-box--finished' : ''}`}
+      onClick={onSelect}
+      title={encounter.name || 'Unnamed Encounter'}
+    >
+      <span className="encounter-toolbar-box-name">{encounter.name || 'Unnamed'}</span>
+    </div>
+  );
+};
 
 export const EncounterToolbar: React.FC<EncounterToolbarProps> = ({
   onNewEncounter,
   encounters = [],
   selectedEncounterId,
   onSelectEncounter,
-  battleActive = false,
+  onReorder,
 }) => {
-  const selectedName = encounters.find(e => e.id === selectedEncounterId)?.name;
+  const sorted = [...encounters].sort((a, b) => {
+    if (a.finished !== b.finished) return a.finished ? 1 : -1;
+    return a.index - b.index;
+  });
 
-  const dropdownItems = encounters.map(e => ({ id: e.id, label: e.name }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sorted.findIndex(e => e.id === active.id);
+    const newIndex = sorted.findIndex(e => e.id === over.id);
+    const reordered = arrayMove(sorted, oldIndex, newIndex);
+    onReorder?.(reordered.map(e => e.id));
+  };
 
   const leftContent = (
-    <>
-      {encounters.length > 0 && (
-        <div style={{ width: '250px' }}>
-          <Dropdown
-            buttonContent={<>{selectedName ?? 'Select Encounter'}<ChevronDownIcon style={{ marginLeft: '4px' }} /></>}
-            items={dropdownItems}
-            onSelect={(id) => onSelectEncounter?.(id)}
-            buttonTitle="Switch encounter"
-            containerClassName="dropdown-full-width"
-          />
-        </div>
+    <div className="encounter-toolbar-content">
+      <div className="encounter-toolbar-actions">
+        <button className="encounter-toolbar-box encounter-toolbar-box--new" onClick={onNewEncounter} title="New Encounter">
+          <PlusIcon />
+          <span className="encounter-toolbar-box-name">New</span>
+        </button>
+      </div>
+      {sorted.length > 0 && (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToHorizontalAxis, restrictToParentElement]} autoScroll={false}>
+          <SortableContext items={sorted.map(e => e.id)} strategy={horizontalListSortingStrategy}>
+            <div className="encounter-toolbar-list">
+              {sorted.map(e => (
+                <SortableBox
+                  key={e.id}
+                  encounter={e}
+                  isSelected={e.id === selectedEncounterId}
+                  onSelect={() => onSelectEncounter?.(e.id)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
-      <Button onClick={onNewEncounter}>
-        <PlusIcon />
-        New Encounter
-      </Button>
-      {battleActive && (
-        <span className="encounter-toolbar-battle-indicator">⚔ Battle Active</span>
-      )}
-    </>
+    </div>
   );
 
   return <Toolbar leftContent={leftContent} />;

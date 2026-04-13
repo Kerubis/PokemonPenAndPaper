@@ -2,7 +2,7 @@
   "pokedexEntry": 4,
   "pokemonName": "Charmander",
   "type1": "Fire",
-  "type2": "Dark",
+  "type2": "",
   "flaw": "Weakened by natural water sources",
   "strength": "Strengthened by natural fire sources",
   "abilityUnlocks": [

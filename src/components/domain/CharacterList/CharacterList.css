@@ -12,11 +12,43 @@
 .character-list-item-container {
   position: relative;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.character-list-drag-handle {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 4px;
+  cursor: grab;
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+
+.character-list-drag-handle:active {
+  cursor: grabbing;
+}
+
+.character-list-item-container:hover .character-list-drag-handle {
+  opacity: 0.8;
+}
+
+.character-list-drag-handle span {
+  display: block;
+  width: 14px;
+  height: 2px;
+  background-color: #a0a0a0;
+  border-radius: 1px;
 }
 
 .character-list-item {
   position: relative;
   transition: all 0.2s ease;
+  flex: 1;
+  min-width: 0;
 }
 
 .character-list-item.active {

@@ -12,11 +12,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   rightContent,
   className = '' 
 }) => {
+  const onlyOne = (!!leftContent) !== (!!rightContent);
+
   return (
     <div className={`toolbar ${className}`}>
-      {leftContent && <div className="toolbar-left">{leftContent}</div>}
-      <div className="toolbar-spacer"></div>
-      {rightContent && <div className="toolbar-right">{rightContent}</div>}
+      {leftContent && (
+        <div className="toolbar-left" style={onlyOne ? { width: '100%' } : undefined}>
+          {leftContent}
+        </div>
+      )}
+      {!onlyOne && <div className="toolbar-spacer"></div>}
+      {rightContent && (
+        <div className="toolbar-right" style={onlyOne ? { width: '100%' } : undefined}>
+          {rightContent}
+        </div>
+      )}
     </div>
   );
 };

@@ -54,10 +54,20 @@ export const EncounterPage: React.FC = () => {
       const gameState = loadGame();
       const gameGuid = gameState?.guid || crypto.randomUUID();
       const gameName = gameState?.gameName || 'My Pokemon Game';
-      const pokemon = loadPokemon();
-      updateGame(gameGuid, gameName, pokemon, encounters);
+      updateGame(gameGuid, gameName, allPokemon, encounters);
     }
   }, [encounters]);
+
+  // Save pokemon to storage whenever they change (e.g. damage dealt)
+  useEffect(() => {
+    if (allPokemon.length > 0) {
+      const gameState = loadGame();
+      const gameGuid = gameState?.guid || crypto.randomUUID();
+      const gameName = gameState?.gameName || 'My Pokemon Game';
+      const currentEncounters = loadEncounters();
+      updateGame(gameGuid, gameName, allPokemon, currentEncounters);
+    }
+  }, [allPokemon]);
 
   const selectedEncounter = encounters.find(e => e.guid === selectedEncounterId);
 
@@ -124,6 +134,19 @@ export const EncounterPage: React.FC = () => {
         }));
       }
     },
+    {
+      label: 'Finished',
+      type: 'checkbox',
+      value: selectedEncounter.finished,
+      onChange: (value) => {
+        setEncounters(prev => prev.map(e => {
+          if (e.guid === selectedEncounter.guid) {
+            e.setFinished(value as boolean);
+          }
+          return e;
+        }));
+      }
+    },
   ] : [];
 
   // Get pokemon in the selected encounter
@@ -174,10 +197,19 @@ export const EncounterPage: React.FC = () => {
       <div className="encounter-page-toolbar">
         <EncounterToolbar
           onNewEncounter={handleNewEncounter}
-          encounters={encounters.map(e => ({ id: e.guid, name: e.name }))}
+          encounters={encounters.map(e => ({ id: e.guid, name: e.name, index: e.index, finished: e.finished }))}
           selectedEncounterId={selectedEncounterId}
           onSelectEncounter={handleSelectEncounter}
-          battleActive={!!turnOrder}
+          onReorder={(orderedIds) => {
+            setEncounters(prev => {
+              const updated = prev.map(e => {
+                const newIndex = orderedIds.indexOf(e.guid);
+                if (newIndex !== -1) e.setIndex(newIndex);
+                return e;
+              });
+              return [...updated];
+            });
+          }}
         />
       </div>
 
@@ -230,6 +262,7 @@ export const EncounterPage: React.FC = () => {
           <EncounterPropertiesPanel
             pokemon={selectedPokemon}
             onRemovePokemon={selectedPokemon ? handleRemovePokemon : undefined}
+            onDamageDealt={() => setAllPokemon(prev => [...prev])}
           />
         )}
       </div>

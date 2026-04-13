@@ -20,6 +20,7 @@ export interface SerializedPokemon {
   speed: number;
   isPlayerCharacter: boolean;
   abilities: SerializedAbility[];
+  index: number;
 }
 
 export interface SerializedEncounter {
@@ -28,6 +29,8 @@ export interface SerializedEncounter {
   musicLink: string;
   pokemonGuids: string[];
   story?: string;
+  index: number;
+  finished: boolean;
 }
 
 export interface GameState {

@@ -28,6 +28,7 @@ export class Pokemon {
     private _abilities: Ability[];
     private _abilityUnlocks: AbilityUnlock[];
     private _isPlayerCharacter: boolean;
+    private _index: number;
 
     constructor(
         pokedexEntry: number,
@@ -49,6 +50,7 @@ export class Pokemon {
             strength = "",
             abilities = [],
             isPlayerCharacter = false,
+            index = 0,
         }: {
             id?: string;
             name?: string;
@@ -64,6 +66,7 @@ export class Pokemon {
             strength?: string;
             abilities?: Ability[];
             isPlayerCharacter?: boolean;
+            index?: number;
         } = {}
     ) {
         this._id = id;
@@ -85,6 +88,7 @@ export class Pokemon {
         this._abilities = abilities;
         this._abilityUnlocks = [];
         this._isPlayerCharacter = isPlayerCharacter;
+        this._index = index;
 
         // If currentHp is 0 or was not explicitly set to a positive value, set it to maxHp
         if (this._currentHp === 0) {
@@ -161,6 +165,10 @@ export class Pokemon {
         return this._isPlayerCharacter;
     }
 
+    get index(): number {
+        return this._index;
+    }
+
     get maxHp(): number {
         return this._hp + this._level * GAME_CONSTANTS.HP_PER_LEVEL;
     }
@@ -211,12 +219,16 @@ export class Pokemon {
         // Ensure damage is not below 0
         finalDamage = Math.max(0, finalDamage);
 
-        // Apply damage to current HP
-        this._currentHp = Math.max(0, this._currentHp - finalDamage);
+        // Apply damage to current HP (round up so fractional damage always deals at least 1)
+        this._currentHp = Math.max(0, this._currentHp - Math.ceil(finalDamage));
     }
 
     dealDirectDamage(type: PokemonType, damageType: Exclude<DamageType, "Status">, amount: number): void {
         this.damagePokemon(type, damageType, amount);
+    }
+
+    heal(amount: number): void {
+        this._currentHp = Math.min(this.maxHp, this._currentHp + Math.floor(amount));
     }
 
     incrementLevel(): void {
@@ -267,6 +279,10 @@ export class Pokemon {
     }
     setIsPlayerCharacter(isPlayerCharacter: boolean): void {
         this._isPlayerCharacter = isPlayerCharacter;
+    }
+
+    setIndex(index: number): void {
+        this._index = index;
     }
 
 

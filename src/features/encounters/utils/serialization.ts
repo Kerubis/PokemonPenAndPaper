@@ -11,6 +11,8 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
         musicLink: encounter.musicLink,
         pokemonGuids: encounter.pokemonGuids,
         story: encounter.story,
+        index: encounter.index,
+        finished: encounter.finished,
     };
 }
 
@@ -24,5 +26,7 @@ export function deserializeEncounter(data: SerializedEncounter): Encounter {
         musicLink: data.musicLink,
         pokemonGuids: data.pokemonGuids,
         story: data.story ?? '',
+        index: data.index ?? 0,
+        finished: data.finished ?? false,
     });
 }

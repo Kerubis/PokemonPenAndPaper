@@ -4,6 +4,8 @@ export class Encounter {
     private _musicLink: string;
     private _pokemonGuids: string[];
     private _story: string;
+    private _index: number;
+    private _finished: boolean;
 
     constructor(
         {
@@ -12,12 +14,16 @@ export class Encounter {
             musicLink = "",
             pokemonGuids = [],
             story = "",
+            index = 0,
+            finished = false,
         }: {
             guid?: string;
             name?: string;
             musicLink?: string;
             pokemonGuids?: string[];
             story?: string;
+            index?: number;
+            finished?: boolean;
         } = {}
     ) {
         this._guid = guid;
@@ -25,6 +31,8 @@ export class Encounter {
         this._musicLink = musicLink;
         this._pokemonGuids = pokemonGuids;
         this._story = story;
+        this._index = index;
+        this._finished = finished;
     }
 
     // Getters
@@ -48,6 +56,14 @@ export class Encounter {
         return this._story;
     }
 
+    get index(): number {
+        return this._index;
+    }
+
+    get finished(): boolean {
+        return this._finished;
+    }
+
     // Setters
     setName(name: string): void {
         this._name = name;
@@ -59,6 +75,14 @@ export class Encounter {
 
     setStory(story: string): void {
         this._story = story;
+    }
+
+    setIndex(index: number): void {
+        this._index = index;
+    }
+
+    setFinished(finished: boolean): void {
+        this._finished = finished;
     }
 
     // Pokemon management
