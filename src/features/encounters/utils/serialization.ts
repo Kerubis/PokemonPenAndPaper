@@ -8,7 +8,7 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
     return {
         guid: encounter.guid,
         name: encounter.name,
-        musicLink: encounter.musicLink,
+        musicLinks: encounter.musicLinks,
         pokemonGuids: encounter.pokemonGuids,
         story: encounter.story,
         index: encounter.index,
@@ -20,10 +20,15 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
  * Deserialize a plain object to an Encounter instance
  */
 export function deserializeEncounter(data: SerializedEncounter): Encounter {
+    // Backward compat: migrate legacy single musicLink to array
+    let musicLinks = data.musicLinks ?? [];
+    if (musicLinks.length === 0 && data.musicLink) {
+        musicLinks = [{ url: data.musicLink, description: 'Battle Music' }];
+    }
     return new Encounter({
         guid: data.guid,
         name: data.name,
-        musicLink: data.musicLink,
+        musicLinks,
         pokemonGuids: data.pokemonGuids,
         story: data.story ?? '',
         index: data.index ?? 0,

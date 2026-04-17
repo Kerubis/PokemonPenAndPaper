@@ -63,9 +63,9 @@ export function calculateDefensiveEffectiveness(
     if (type2) {
       modifier *= attackingType.getOffensiveModifier(type2.name);
     }
-
     if (modifier === 0) {
       immunities.push(attackingType);
+      console.log(immunities);
     } else if (modifier >= 4) {
       doubleWeaknesses.push(attackingType);
     } else if (modifier > 1) {

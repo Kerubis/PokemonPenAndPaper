@@ -18,7 +18,8 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "features", "pokemon"
 
 
 def fetch_json(url: str) -> dict:
-    with urllib.request.urlopen(url) as response:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req) as response:
         return json.loads(response.read().decode())
 
 

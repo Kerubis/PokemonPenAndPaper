@@ -5,8 +5,9 @@ import { HomePage } from './pages/HomePage'
 import { CharactersPage } from './pages/CharactersPage'
 import { EncounterPage } from './pages/EncounterPage'
 import { RulesPage } from './pages/RulesPage'
+import { MusicProvider } from './contexts/MusicContext'
 
-function App() {
+function AppInner() {
   return (
     <div className="app-container">
       <Menu />
@@ -23,7 +24,15 @@ function App() {
         </Routes>
       </div>
     </div>
-  )
+  );
+}
+
+function App() {
+  return (
+    <MusicProvider>
+      <AppInner />
+    </MusicProvider>
+  );
 }
 
 export default App

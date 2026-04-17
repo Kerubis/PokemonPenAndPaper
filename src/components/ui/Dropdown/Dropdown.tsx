@@ -10,14 +10,17 @@ export interface DropdownItem {
 }
 
 interface DropdownProps {
-    buttonContent: ReactNode;
+    buttonContent?: ReactNode;
     items: DropdownItem[];
     onSelect: (itemId: string) => void;
     renderItem?: (item: DropdownItem) => ReactNode;
+    filterItem?: (item: DropdownItem, searchText: string) => boolean;
     dropdownClassName?: string;
     containerClassName?: string;
     buttonTitle?: string;
     disabled?: boolean;
+    searchable?: boolean;
+    searchPlaceholder?: string;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -25,12 +28,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
     items,
     onSelect,
     renderItem,
+    filterItem,
     dropdownClassName = 'dropdown-list',
     containerClassName = '',
     buttonTitle,
-    disabled = false
+    disabled = false,
+    searchable = false,
+    searchPlaceholder = 'Search...'
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchText, setSearchText] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -38,6 +45,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
+                if (searchable) setSearchText('');
             }
         };
 
@@ -48,29 +56,57 @@ export const Dropdown: React.FC<DropdownProps> = ({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, searchable]);
 
     const handleItemSelect = (itemId: string) => {
         onSelect(itemId);
         setIsOpen(false);
+        if (searchable) setSearchText('');
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchText(value);
+        setIsOpen(value.length > 0);
     };
 
     const defaultRenderItem = (item: DropdownItem) => (
         <span>{item.label}</span>
     );
 
+    const filteredItems = searchable
+        ? items.filter(item =>
+            filterItem
+                ? filterItem(item, searchText)
+                : item.label.toLowerCase().includes(searchText.toLowerCase())
+          )
+        : items;
+
     return (
         <div className={`dropdown-container ${containerClassName}`} ref={dropdownRef}>
-            <Button
-                onClick={() => setIsOpen(!isOpen)}
-                title={buttonTitle}
-                disabled={disabled}
-            >
-                {buttonContent}
-            </Button>
+            {searchable ? (
+                <input
+                    className="dropdown-search-input"
+                    type="text"
+                    value={searchText}
+                    onChange={handleSearchChange}
+                    onFocus={() => setIsOpen(true)}
+                    placeholder={searchPlaceholder}
+                    disabled={disabled}
+                    title={buttonTitle}
+                />
+            ) : (
+                <Button
+                    onClick={() => setIsOpen(!isOpen)}
+                    title={buttonTitle}
+                    disabled={disabled}
+                >
+                    {buttonContent}
+                </Button>
+            )}
             {isOpen && (
                 <div className={dropdownClassName}>
-                    {items.map(item => (
+                    {filteredItems.length > 0 ? filteredItems.map(item => (
                         <div
                             key={item.id}
                             className="dropdown-item"
@@ -78,7 +114,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
                         >
                             {renderItem ? renderItem(item) : defaultRenderItem(item)}
                         </div>
-                    ))}
+                    )) : (
+                        <div className="dropdown-item dropdown-no-results">No results</div>
+                    )}
                 </div>
             )}
         </div>

@@ -32,12 +32,14 @@ export const EncounterPropertiesPanel: React.FC<EncounterPropertiesPanelProps> =
     const type = (PokemonType as unknown as Record<string, PokemonType>)[attackingType];
     if (!type) return;
     pokemon.dealDirectDamage(type, damageType, damageAmount);
+    setDamageAmount(0);
     onDamageDealt?.();
   };
 
   const handleHeal = () => {
     if (!pokemon || healAmount <= 0) return;
     pokemon.heal(healAmount);
+    setHealAmount(0);
     onDamageDealt?.();
   };
 

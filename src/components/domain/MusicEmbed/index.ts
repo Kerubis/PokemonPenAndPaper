@@ -1,0 +1,1 @@
+export { MusicEmbed } from './MusicEmbed';

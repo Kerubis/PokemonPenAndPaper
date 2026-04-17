@@ -122,19 +122,6 @@ export const EncounterPage: React.FC = () => {
       }
     },
     {
-      label: 'Music Link',
-      type: 'text',
-      value: selectedEncounter.musicLink,
-      onChange: (value) => {
-        setEncounters(prev => prev.map(e => {
-          if (e.guid === selectedEncounter.guid) {
-            e.setMusicLink(value as string);
-          }
-          return e;
-        }));
-      }
-    },
-    {
       label: 'Finished',
       type: 'checkbox',
       value: selectedEncounter.finished,
@@ -219,7 +206,13 @@ export const EncounterPage: React.FC = () => {
           onDelete={selectedEncounter ? handleDeleteClick : undefined}
           availablePokemon={availablePokemonForEncounter}
           onAddPokemon={selectedEncounter ? handleAddPokemon : undefined}
-          musicLink={selectedEncounter?.musicLink}
+          musicLinks={selectedEncounter?.musicLinks ?? []}
+          onMusicLinksChange={selectedEncounter ? (links) => {
+            setEncounters(prev => prev.map(e => {
+              if (e.guid === selectedEncounter.guid) e.setMusicLinks(links);
+              return e;
+            }));
+          } : undefined}
         />
 
         <div className="encounter-page-main">

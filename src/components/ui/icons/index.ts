@@ -8,3 +8,4 @@ export { CheckCircleIcon } from './CheckCircleIcon';
 export { DocumentIcon } from './DocumentIcon';
 export { TrashIcon } from './TrashIcon';
 export { BattleIcon } from './BattleIcon';
+export { MusicIcon } from './MusicIcon';

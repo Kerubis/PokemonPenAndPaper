@@ -1,7 +1,12 @@
+export interface MusicLink {
+    url: string;
+    description: string;
+}
+
 export class Encounter {
     private _guid: string;
     private _name: string;
-    private _musicLink: string;
+    private _musicLinks: MusicLink[];
     private _pokemonGuids: string[];
     private _story: string;
     private _index: number;
@@ -11,7 +16,7 @@ export class Encounter {
         {
             guid = crypto.randomUUID(),
             name = "",
-            musicLink = "",
+            musicLinks = [],
             pokemonGuids = [],
             story = "",
             index = 0,
@@ -19,7 +24,7 @@ export class Encounter {
         }: {
             guid?: string;
             name?: string;
-            musicLink?: string;
+            musicLinks?: MusicLink[];
             pokemonGuids?: string[];
             story?: string;
             index?: number;
@@ -28,7 +33,7 @@ export class Encounter {
     ) {
         this._guid = guid;
         this._name = name;
-        this._musicLink = musicLink;
+        this._musicLinks = musicLinks;
         this._pokemonGuids = pokemonGuids;
         this._story = story;
         this._index = index;
@@ -44,8 +49,8 @@ export class Encounter {
         return this._name;
     }
 
-    get musicLink(): string {
-        return this._musicLink;
+    get musicLinks(): MusicLink[] {
+        return [...this._musicLinks];
     }
 
     get pokemonGuids(): string[] {
@@ -69,8 +74,22 @@ export class Encounter {
         this._name = name;
     }
 
-    setMusicLink(musicLink: string): void {
-        this._musicLink = musicLink;
+    addMusicLink(link: MusicLink): void {
+        this._musicLinks.push(link);
+    }
+
+    updateMusicLink(index: number, link: MusicLink): void {
+        if (index >= 0 && index < this._musicLinks.length) {
+            this._musicLinks[index] = link;
+        }
+    }
+
+    removeMusicLink(index: number): void {
+        this._musicLinks.splice(index, 1);
+    }
+
+    setMusicLinks(links: MusicLink[]): void {
+        this._musicLinks = [...links];
     }
 
     setStory(story: string): void {

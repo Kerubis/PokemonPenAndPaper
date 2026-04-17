@@ -173,6 +173,10 @@ export class Pokemon {
         return this._hp + this._level * GAME_CONSTANTS.HP_PER_LEVEL;
     }
 
+    get totalAllocatedStats(): number {
+        return this._hp + this._attack + this._specialAttack + this._defense + this._specialDefense + this._speed;
+    }
+
     get abilities(): Ability[] {
         return this._abilities;
     }
@@ -251,31 +255,36 @@ export class Pokemon {
         this._currentHp += levelDifference * GAME_CONSTANTS.HP_PER_LEVEL;
     }
     setHp(hp: number): void {
-        const oldHp = this._hp;
-        this._hp = hp;
-
-        const hpDifference = hp - oldHp;
+        const available = this._level - (this.totalAllocatedStats - this._hp);
+        const clamped = Math.min(hp, Math.max(0, available));
+        const hpDifference = clamped - this._hp;
+        this._hp = clamped;
         this._currentHp += hpDifference;
     }
 
     setAttack(attack: number): void {
-        this._attack = attack;
+        const available = this._level - (this.totalAllocatedStats - this._attack);
+        this._attack = Math.min(attack, Math.max(0, available));
     }
 
     setSpecialAttack(specialAttack: number): void {
-        this._specialAttack = specialAttack;
+        const available = this._level - (this.totalAllocatedStats - this._specialAttack);
+        this._specialAttack = Math.min(specialAttack, Math.max(0, available));
     }
 
     setDefense(defense: number): void {
-        this._defense = defense;
+        const available = this._level - (this.totalAllocatedStats - this._defense);
+        this._defense = Math.min(defense, Math.max(0, available));
     }
 
     setSpecialDefense(specialDefense: number): void {
-        this._specialDefense = specialDefense;
+        const available = this._level - (this.totalAllocatedStats - this._specialDefense);
+        this._specialDefense = Math.min(specialDefense, Math.max(0, available));
     }
 
     setSpeed(speed: number): void {
-        this._speed = speed;
+        const available = this._level - (this.totalAllocatedStats - this._speed);
+        this._speed = Math.min(speed, Math.max(0, available));
     }
     setIsPlayerCharacter(isPlayerCharacter: boolean): void {
         this._isPlayerCharacter = isPlayerCharacter;

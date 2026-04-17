@@ -100,11 +100,11 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           </div>
           
           <div className="charcter-sheet-effectiveness-column">
-            {renderDefensiveRow('Double Weak', doubleWeaknesses)}
-            {renderDefensiveRow('Weak to', weaknesses)}
-            {renderDefensiveRow('Resistant to', resistances)}
-            {renderDefensiveRow('Double Resist', doubleResistances)}
-            {renderDefensiveRow('Immune to', immunities)}
+            {renderDefensiveRow('Double Weak (×4)', doubleWeaknesses)}
+            {renderDefensiveRow('Weak (×2)', weaknesses)}
+            {renderDefensiveRow('Resistant (×½)', resistances)}
+            {renderDefensiveRow('Double Resist (×¼)', doubleResistances)}
+            {renderDefensiveRow('Immune (×0)', immunities)}
           </div>
         </div>
       </div>

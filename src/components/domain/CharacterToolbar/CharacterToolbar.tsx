@@ -5,7 +5,7 @@ import { Dropdown } from '@/components/ui/Dropdown';
 import type { DropdownItem } from '@/components/ui/Dropdown';
 import { formatPokedexNumber } from '@/lib/utils';
 import { getAvailablePokemonOptions } from '@/features/pokemon/utils/pokemonOptions';
-import { PlusIcon, ChevronDownIcon, PrintIcon } from '@/components/ui/icons';
+import { PrintIcon } from '@/components/ui/icons';
 
 interface CharacterToolbarProps {
     canExport: boolean;
@@ -38,22 +38,21 @@ export const CharacterToolbar: React.FC<CharacterToolbarProps> = ({
         </>
     );
 
-    // Button content with icon and dropdown arrow
-    const newButtonContent = (
-        <>
-            <PlusIcon />
-            New
-            <ChevronDownIcon style={{ marginLeft: '4px' }} />
-        </>
-    );
-
     const leftContent = (
         <Dropdown
-            buttonContent={newButtonContent}
             items={dropdownItems}
             onSelect={onNewCharacter}
             renderItem={renderPokemonItem}
+            filterItem={(item, searchText) => {
+                const q = searchText.toLowerCase();
+                return (
+                    item.label.toLowerCase().includes(q) ||
+                    String(item.metadata.number).includes(q)
+                );
+            }}
             buttonTitle="New Character"
+            searchable
+            searchPlaceholder="Add Pokémon..."
         />
     );
 

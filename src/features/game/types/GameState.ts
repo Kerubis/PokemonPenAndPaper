@@ -23,10 +23,16 @@ export interface SerializedPokemon {
   index: number;
 }
 
+export interface SerializedMusicLink {
+  url: string;
+  description: string;
+}
+
 export interface SerializedEncounter {
   guid: string;
   name: string;
-  musicLink: string;
+  musicLink?: string; // legacy, kept for backward compat
+  musicLinks?: SerializedMusicLink[];
   pokemonGuids: string[];
   story?: string;
   index: number;

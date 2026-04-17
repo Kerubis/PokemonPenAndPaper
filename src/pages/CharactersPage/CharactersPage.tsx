@@ -131,7 +131,8 @@ export const CharactersPage: React.FC = () => {
                 flaw: c.flaw,
                 strength: c.strength,
                 abilities: c.abilities,
-                isPlayerCharacter: c.isPlayerCharacter
+                isPlayerCharacter: c.isPlayerCharacter,
+                index: c.index
               }) ?? c
             : c
         ));
@@ -159,7 +160,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setLevel(level);
             return updated ?? c;
@@ -191,7 +193,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setHp(hp);
             return updated ?? c;
@@ -223,7 +226,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setAttack(attack);
             return updated ?? c;
@@ -255,7 +259,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setSpecialAttack(specialAttack);
             return updated ?? c;
@@ -287,7 +292,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setDefense(defense);
             return updated ?? c;
@@ -319,7 +325,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setSpecialDefense(specialDefense);
             return updated ?? c;
@@ -351,7 +358,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setSpeed(speed);
             return updated ?? c;
@@ -383,7 +391,8 @@ export const CharactersPage: React.FC = () => {
               flaw: c.flaw,
               strength: c.strength,
               abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter
+              isPlayerCharacter: c.isPlayerCharacter,
+              index: c.index
             });
             if (updated) if (updated) updated.setIsPlayerCharacter(isPlayerCharacter);
             return updated ?? c;
