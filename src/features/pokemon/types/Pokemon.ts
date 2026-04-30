@@ -23,6 +23,10 @@ export class Pokemon {
     private _defense: number;
     private _specialDefense: number;
     private _speed: number;
+    private _walkSpeed: number;
+    private _swimSpeed: number;
+    private _climbSpeed: number;
+    private _flySpeed: number;
     private _flaw: string;
     private _strength: string;
     private _abilities: Ability[];
@@ -46,6 +50,10 @@ export class Pokemon {
             defense = 0,
             specialDefense = 0,
             speed = 0,
+            walkSpeed = 0,
+            swimSpeed = 0,
+            climbSpeed = 0,
+            flySpeed = 0,
             flaw = "",
             strength = "",
             abilities = [],
@@ -62,6 +70,10 @@ export class Pokemon {
             defense?: number;
             specialDefense?: number;
             speed?: number;
+            walkSpeed?: number;
+            swimSpeed?: number;
+            climbSpeed?: number;
+            flySpeed?: number;
             flaw?: string;
             strength?: string;
             abilities?: Ability[];
@@ -83,6 +95,10 @@ export class Pokemon {
         this._defense = defense;
         this._specialDefense = specialDefense;
         this._speed = speed;
+        this._walkSpeed = walkSpeed;
+        this._swimSpeed = swimSpeed;
+        this._climbSpeed = climbSpeed;
+        this._flySpeed = flySpeed;
         this._flaw = flaw;
         this._strength = strength;
         this._abilities = abilities;
@@ -151,6 +167,22 @@ export class Pokemon {
 
     get speed(): number {
         return this._speed;
+    }
+
+    get walkSpeed(): number {
+        return this._walkSpeed;
+    }
+
+    get swimSpeed(): number {
+        return this._swimSpeed;
+    }
+
+    get climbSpeed(): number {
+        return this._climbSpeed;
+    }
+
+    get flySpeed(): number {
+        return this._flySpeed;
     }
 
     get flaw(): string {
@@ -286,6 +318,23 @@ export class Pokemon {
         const available = this._level - (this.totalAllocatedStats - this._speed);
         this._speed = Math.min(speed, Math.max(0, available));
     }
+
+    setWalkSpeed(walkSpeed: number): void {
+        this._walkSpeed = Math.max(0, walkSpeed);
+    }
+
+    setSwimSpeed(swimSpeed: number): void {
+        this._swimSpeed = Math.max(0, swimSpeed);
+    }
+
+    setClimbSpeed(climbSpeed: number): void {
+        this._climbSpeed = Math.max(0, climbSpeed);
+    }
+
+    setFlySpeed(flySpeed: number): void {
+        this._flySpeed = Math.max(0, flySpeed);
+    }
+
     setIsPlayerCharacter(isPlayerCharacter: boolean): void {
         this._isPlayerCharacter = isPlayerCharacter;
     }

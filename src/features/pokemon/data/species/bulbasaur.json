@@ -6,7 +6,17 @@
   "flaw": "Weakened by natural fire sources",
   "strength": "Strengthened by vegetation",
   "abilityUnlocks": [
-    { "ability": "Tackle", "level": 1 },
-    { "ability": "Constrict", "level": 1 }
-  ]
+    {
+      "ability": "Tackle",
+      "level": 1
+    },
+    {
+      "ability": "Constrict",
+      "level": 1
+    }
+  ],
+  "walkSpeed": 5,
+  "swimSpeed": 0,
+  "climbSpeed": 0,
+  "flySpeed": 0
 }

@@ -5,5 +5,9 @@
   "type2": "Poison",
   "flaw": "",
   "strength": "",
-  "abilityUnlocks": []
+  "abilityUnlocks": [],
+  "walkSpeed": 5,
+  "swimSpeed": 5,
+  "climbSpeed": 0,
+  "flySpeed": 0
 }

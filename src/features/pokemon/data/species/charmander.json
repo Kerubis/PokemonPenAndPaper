@@ -6,8 +6,21 @@
   "flaw": "Weakened by natural water sources",
   "strength": "Strengthened by natural fire sources",
   "abilityUnlocks": [
-    { "ability": "Scratch", "level": 1 },
-    { "ability": "Growl", "level": 1 },
-    { "ability": "Ember", "level": 6 }
-  ]
+    {
+      "ability": "Scratch",
+      "level": 1
+    },
+    {
+      "ability": "Growl",
+      "level": 1
+    },
+    {
+      "ability": "Ember",
+      "level": 6
+    }
+  ],
+  "walkSpeed": 5,
+  "swimSpeed": 0,
+  "climbSpeed": 0,
+  "flySpeed": 0
 }

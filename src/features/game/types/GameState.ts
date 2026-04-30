@@ -18,6 +18,10 @@ export interface SerializedPokemon {
   defense: number;
   specialDefense: number;
   speed: number;
+  walkSpeed: number;
+  swimSpeed: number;
+  climbSpeed: number;
+  flySpeed: number;
   isPlayerCharacter: boolean;
   abilities: SerializedAbility[];
   index: number;

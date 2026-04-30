@@ -68,6 +68,11 @@
   border-radius: 50%;
   background: #4caf50;
   border: 1px solid #2c2c2c;
+  transition: background 0.3s ease;
+}
+
+.menu-music-indicator--paused {
+  background: #e53935;
 }
 
 /* ── Music flyout panel ── */

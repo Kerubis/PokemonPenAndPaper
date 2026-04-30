@@ -5,5 +5,9 @@
   "type2": "Ghost",
   "flaw": "",
   "strength": "",
-  "abilityUnlocks": []
+  "abilityUnlocks": [],
+  "walkSpeed": 5,
+  "swimSpeed": 0,
+  "climbSpeed": 0,
+  "flySpeed": 0
 }

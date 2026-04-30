@@ -6,7 +6,17 @@
   "flaw": "Pollinosis",
   "strength": "Strengthened by natural water",
   "abilityUnlocks": [
-    { "ability": "Tackle", "level": 1 },
-    { "ability": "TailWhip", "level": 1 }
-  ]
+    {
+      "ability": "Tackle",
+      "level": 1
+    },
+    {
+      "ability": "TailWhip",
+      "level": 1
+    }
+  ],
+  "walkSpeed": 5,
+  "swimSpeed": 5,
+  "climbSpeed": 0,
+  "flySpeed": 0
 }

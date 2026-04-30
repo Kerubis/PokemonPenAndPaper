@@ -9,7 +9,7 @@ export const Menu: React.FC = () => {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `menu-item${isActive ? ' active' : ''}`;
 
-  const { currentLink } = useMusicContext();
+  const { currentLink, isPlaying } = useMusicContext();
   const [musicOpen, setMusicOpen] = useState(false);
 
   return (
@@ -32,7 +32,7 @@ export const Menu: React.FC = () => {
           onClick={() => setMusicOpen(prev => !prev)}
         >
           <MusicIcon />
-          {currentLink && <span className="menu-music-indicator" />}
+          {currentLink && <span className={`menu-music-indicator${isPlaying ? '' : ' menu-music-indicator--paused'}`} />}
         </button>
         <NavLink className={navClass} to="/Rules" title="Rules">
           <DocumentIcon />

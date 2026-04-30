@@ -56,6 +56,10 @@ export function serializePokemon(pokemon: Pokemon): SerializedPokemon {
     defense: pokemon.defense,
     specialDefense: pokemon.specialDefense,
     speed: pokemon.speed,
+    walkSpeed: pokemon.walkSpeed,
+    swimSpeed: pokemon.swimSpeed,
+    climbSpeed: pokemon.climbSpeed,
+    flySpeed: pokemon.flySpeed,
     isPlayerCharacter: pokemon.isPlayerCharacter,
     abilities: pokemon.abilities.map(serializeAbility),
     index: pokemon.index
@@ -79,6 +83,10 @@ export function deserializePokemon(data: SerializedPokemon): Pokemon {
     defense: data.defense,
     specialDefense: data.specialDefense,
     speed: data.speed,
+    walkSpeed: data.walkSpeed ?? 0,
+    swimSpeed: data.swimSpeed ?? 0,
+    climbSpeed: data.climbSpeed ?? 0,
+    flySpeed: data.flySpeed ?? 0,
     abilities: data.abilities.map(deserializeAbility),
     isPlayerCharacter: data.isPlayerCharacter,
     index: data.index ?? 0
