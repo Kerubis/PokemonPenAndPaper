@@ -1,6 +1,7 @@
 import React from 'react';
 import { BorderBox } from '@/components/ui/BorderBox';
 import { TypeBadge } from '@/components/domain/TypeBadge';
+import { WalkIcon, WaveIcon, WingIcon, MountainIcon } from '@/components/ui/icons';
 import { formatPokedexNumber } from '@/lib/utils';
 import { calculateDefensiveEffectiveness } from '@/features/pokemon/utils/typeEffectiveness';
 import type { Pokemon, PokemonType } from '@/features/pokemon/types';
@@ -156,6 +157,34 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
       </div>
       
       <div className="charcter-sheet-additional-section">
+        <div className="charcter-sheet-movement-section">
+          <div className="charcter-sheet-movement-boxes">
+            <BorderBox label="Walk" className="charcter-sheet-box-movement">
+              <div className="charcter-sheet-movement-box-content">
+                <WalkIcon width={48} height={48} className="charcter-sheet-movement-bg-icon" />
+                <div className="charcter-sheet-movement-value">{pokemon.walkSpeed}</div>
+              </div>
+            </BorderBox>
+            <BorderBox label="Swim" className="charcter-sheet-box-movement">
+              <div className="charcter-sheet-movement-box-content">
+                <WaveIcon width={48} height={48} className="charcter-sheet-movement-bg-icon" />
+                <div className="charcter-sheet-movement-value">{pokemon.swimSpeed}</div>
+              </div>
+            </BorderBox>
+            <BorderBox label="Climb" className="charcter-sheet-box-movement">
+              <div className="charcter-sheet-movement-box-content">
+                <MountainIcon width={48} height={48} className="charcter-sheet-movement-bg-icon" />
+                <div className="charcter-sheet-movement-value">{pokemon.climbSpeed}</div>
+              </div>
+            </BorderBox>
+            <BorderBox label="Fly" className="charcter-sheet-box-movement">
+              <div className="charcter-sheet-movement-box-content">
+                <WingIcon width={48} height={48} className="charcter-sheet-movement-bg-icon" />
+                <div className="charcter-sheet-movement-value">{pokemon.flySpeed}</div>
+              </div>
+            </BorderBox>
+          </div>
+        </div>
         <BorderBox label="Flaw:" className="charcter-sheet-box-trait">
           <div className="charcter-sheet-trait-text">{pokemon.flaw}</div>
         </BorderBox>

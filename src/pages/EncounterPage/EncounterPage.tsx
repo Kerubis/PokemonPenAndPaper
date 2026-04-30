@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EncounterToolbar } from '@/components/domain/EncounterToolbar';
 import { EncounterSidePanel } from '@/components/domain/EncounterSidePanel';
@@ -22,6 +22,42 @@ export const EncounterPage: React.FC = () => {
   const [allPokemon, setAllPokemon] = useState<Pokemon[]>([]);
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<{ x: number; y: number } | null>(null);
+
+  // Floating TurnOrderPanel drag state
+  const [turnOrderPos, setTurnOrderPos] = useState({ x: 16, y: 16 });
+  const dragState = useRef<{ startMouseX: number; startMouseY: number; startPosX: number; startPosY: number } | null>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const floatingRef = useRef<HTMLDivElement>(null);
+
+  const handleTurnOrderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const header = (e.target as HTMLElement).closest('.turn-order-header');
+    if (!header) return;
+    e.preventDefault();
+    dragState.current = {
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startPosX: turnOrderPos.x,
+      startPosY: turnOrderPos.y,
+    };
+    const onMouseMove = (me: MouseEvent) => {
+      if (!dragState.current) return;
+      const container = mainRef.current;
+      const floating = floatingRef.current;
+      const maxX = container ? container.clientWidth - (floating?.offsetWidth ?? 340) : Infinity;
+      const maxY = container ? container.clientHeight - (floating?.offsetHeight ?? 100) : Infinity;
+      setTurnOrderPos({
+        x: Math.max(0, Math.min(maxX, dragState.current.startPosX + me.clientX - dragState.current.startMouseX)),
+        y: Math.max(0, Math.min(maxY, dragState.current.startPosY + me.clientY - dragState.current.startMouseY)),
+      });
+    };
+    const onMouseUp = () => {
+      dragState.current = null;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
 
   const {
     turnOrder,
@@ -215,7 +251,7 @@ export const EncounterPage: React.FC = () => {
           } : undefined}
         />
 
-        <div className="encounter-page-main">
+          <div className="encounter-page-main" ref={mainRef}>
           {selectedEncounter ? (
             <>
               <EncounterContent
@@ -229,20 +265,27 @@ export const EncounterPage: React.FC = () => {
                   }));
                 }}
               />
-              <TurnOrderPanel
-                turnOrder={turnOrder}
-                pokemon={encounterPokemon}
-                onStartBattle={handleStartBattle}
-                onNextTurn={nextTurn}
-                onPrevTurn={prevTurn}
-                onEndBattle={endTurnOrder}
-                onSetInitiativeOverride={setInitiativeOverride}
-                onClearInitiativeOverride={clearInitiativeOverride}
-                onAddEffect={addEffect}
-                onRemoveEffect={removeEffect}
-                onSelectPokemon={setSelectedPokemon}
-                selectedPokemonId={selectedPokemon?.id ?? null}
-              />
+              <div
+                className="turn-order-floating"
+                style={{ left: turnOrderPos.x, top: turnOrderPos.y }}
+                onMouseDown={handleTurnOrderMouseDown}
+                ref={floatingRef}
+              >
+                <TurnOrderPanel
+                  turnOrder={turnOrder}
+                  pokemon={encounterPokemon}
+                  onStartBattle={handleStartBattle}
+                  onNextTurn={nextTurn}
+                  onPrevTurn={prevTurn}
+                  onEndBattle={endTurnOrder}
+                  onSetInitiativeOverride={setInitiativeOverride}
+                  onClearInitiativeOverride={clearInitiativeOverride}
+                  onAddEffect={addEffect}
+                  onRemoveEffect={removeEffect}
+                  onSelectPokemon={setSelectedPokemon}
+                  selectedPokemonId={selectedPokemon?.id ?? null}
+                />
+              </div>
             </>
           ) : (
             <div className="encounter-page-empty">

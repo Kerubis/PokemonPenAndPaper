@@ -9,3 +9,7 @@ export { DocumentIcon } from './DocumentIcon';
 export { TrashIcon } from './TrashIcon';
 export { BattleIcon } from './BattleIcon';
 export { MusicIcon } from './MusicIcon';
+export { WalkIcon } from './WalkIcon';
+export { WaveIcon } from './WaveIcon';
+export { WingIcon } from './WingIcon';
+export { MountainIcon } from './MountainIcon';

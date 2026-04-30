@@ -17,6 +17,11 @@
     padding: 10px 12px;
     background-color: #1e1e1e;
     border-bottom: 1px solid #3a3a3a;
+    cursor: grab;
+}
+
+.turn-order-header:active {
+    cursor: grabbing;
 }
 
 .turn-order-round {
