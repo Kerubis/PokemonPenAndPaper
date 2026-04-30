@@ -8,10 +8,10 @@ import { useTurnOrder } from '@/features/encounters';
 import { loadEncounters, loadPokemon, updateGame, loadGame } from '@/features/game';
 import type { Pokemon } from '@/features/pokemon/types';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
-import { EncounterPropertiesPanel } from '@/components/domain/EncounterPropertiesPanel';
 import { TurnOrderPanel } from '@/components/domain/TurnOrderPanel';
 import './EncounterPage.css';
 import { EncounterContent } from '@/components/domain/EncounterContent';
+import { DrawingTool } from '@/components/domain/DrawingTool';
 
 export const EncounterPage: React.FC = () => {
   const { guid } = useParams<{ guid?: string }>();
@@ -249,9 +249,12 @@ export const EncounterPage: React.FC = () => {
               return e;
             }));
           } : undefined}
+          selectedPokemon={selectedPokemon}
+          onRemovePokemon={selectedPokemon ? handleRemovePokemon : undefined}
+          onDamageDealt={() => setAllPokemon(prev => [...prev])}
         />
 
-          <div className="encounter-page-main" ref={mainRef}>
+        <div className="encounter-page-main" ref={mainRef}>
           {selectedEncounter ? (
             <>
               <EncounterContent
@@ -260,6 +263,18 @@ export const EncounterPage: React.FC = () => {
                   setEncounters(prev => prev.map(e => {
                     if (e.guid === selectedEncounterId) {
                       e.setStory(story);
+                    }
+                    return e;
+                  }));
+                }}
+              />
+              <DrawingTool
+                key={selectedEncounter.guid}
+                initialDrawing={selectedEncounter.mapDrawing}
+                onDrawingChange={(dataUrl) => {
+                  setEncounters(prev => prev.map(e => {
+                    if (e.guid === selectedEncounterId) {
+                      e.setMapDrawing(dataUrl);
                     }
                     return e;
                   }));
@@ -293,14 +308,6 @@ export const EncounterPage: React.FC = () => {
             </div>
           )}
         </div>
-
-        {selectedEncounter && (
-          <EncounterPropertiesPanel
-            pokemon={selectedPokemon}
-            onRemovePokemon={selectedPokemon ? handleRemovePokemon : undefined}
-            onDamageDealt={() => setAllPokemon(prev => [...prev])}
-          />
-        )}
       </div>
 
       {showDeleteConfirmation && (

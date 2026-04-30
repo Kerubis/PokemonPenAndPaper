@@ -11,6 +11,7 @@ export class Encounter {
     private _story: string;
     private _index: number;
     private _finished: boolean;
+    private _mapDrawing: string;
 
     constructor(
         {
@@ -21,6 +22,7 @@ export class Encounter {
             story = "",
             index = 0,
             finished = false,
+            mapDrawing = "",
         }: {
             guid?: string;
             name?: string;
@@ -29,6 +31,7 @@ export class Encounter {
             story?: string;
             index?: number;
             finished?: boolean;
+            mapDrawing?: string;
         } = {}
     ) {
         this._guid = guid;
@@ -38,6 +41,7 @@ export class Encounter {
         this._story = story;
         this._index = index;
         this._finished = finished;
+        this._mapDrawing = mapDrawing;
     }
 
     // Getters
@@ -67,6 +71,10 @@ export class Encounter {
 
     get finished(): boolean {
         return this._finished;
+    }
+
+    get mapDrawing(): string {
+        return this._mapDrawing;
     }
 
     // Setters
@@ -102,6 +110,10 @@ export class Encounter {
 
     setFinished(finished: boolean): void {
         this._finished = finished;
+    }
+
+    setMapDrawing(mapDrawing: string): void {
+        this._mapDrawing = mapDrawing;
     }
 
     // Pokemon management

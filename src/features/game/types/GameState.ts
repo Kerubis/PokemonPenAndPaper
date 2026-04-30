@@ -41,6 +41,7 @@ export interface SerializedEncounter {
   story?: string;
   index: number;
   finished: boolean;
+  mapDrawing?: string;
 }
 
 export interface GameState {

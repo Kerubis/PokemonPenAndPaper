@@ -1,15 +1,27 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { SidePanel } from '@/components/ui/SidePanel';
 import { Dropdown, type DropdownItem } from '@/components/ui/Dropdown';
-import { TrashIcon, ChevronDownIcon } from '@/components/ui/icons';
+import { TrashIcon, ChevronDownIcon, DocumentIcon } from '@/components/ui/icons';
+import physicalImg from '@/assets/ability-physical.png';
+import specialImg from '@/assets/ability-special.png';
 import { PropertyFieldGroup } from '@/components/ui/PropertyField';
 import type { MusicLink } from '@/features/encounters/types/Encounter';
+import type { Pokemon } from '@/features/pokemon/types';
+import { PokemonType } from '@/features/pokemon/types/Type';
+import type { DamageType } from '@/features/pokemon/types/DamageType';
 import { useMusicContext } from '@/contexts/MusicContext';
 import './EncounterSidePanel.css';
 
 import type { PropertyField } from '@/components/ui/PropertyField';
 
 export type EncounterPropertyField = PropertyField;
+
+const ALL_TYPES = [
+  'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice',
+  'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
+  'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy',
+] as const;
 
 interface EncounterSidePanelProps {
   fields: EncounterPropertyField[];
@@ -18,9 +30,12 @@ interface EncounterSidePanelProps {
   onAddPokemon?: (id: string) => void;
   musicLinks?: MusicLink[];
   onMusicLinksChange?: (links: MusicLink[]) => void;
+  selectedPokemon?: Pokemon | null;
+  onRemovePokemon?: () => void;
+  onDamageDealt?: () => void;
 }
 
-export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange }) => {
+export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange, selectedPokemon, onRemovePokemon, onDamageDealt }) => {
   const { currentLink, setCurrentLink } = useMusicContext();
   const [newUrl, setNewUrl] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -28,6 +43,27 @@ export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, 
   const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
   const popupRef = useRef<HTMLDivElement>(null);
   const addBtnRef = useRef<HTMLButtonElement>(null);
+
+  const [damageAmount, setDamageAmount] = useState<number>(0);
+  const [damageType, setDamageType] = useState<Exclude<DamageType, 'Status'>>('Physical');
+  const [attackingType, setAttackingType] = useState<string>('Normal');
+  const [healAmount, setHealAmount] = useState<number>(0);
+
+  const handleDealDamage = () => {
+    if (!selectedPokemon || damageAmount <= 0) return;
+    const type = (PokemonType as unknown as Record<string, PokemonType>)[attackingType];
+    if (!type) return;
+    selectedPokemon.dealDirectDamage(type, damageType, damageAmount);
+    setDamageAmount(0);
+    onDamageDealt?.();
+  };
+
+  const handleHeal = () => {
+    if (!selectedPokemon || healAmount <= 0) return;
+    selectedPokemon.heal(healAmount);
+    setHealAmount(0);
+    onDamageDealt?.();
+  };
 
   useEffect(() => {
     if (!addPopupOpen) return;
@@ -93,6 +129,103 @@ export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, 
               buttonTitle="Add Pokemon to encounter"
             />
           </div>
+        </div>
+      )}
+
+      {selectedPokemon && (
+        <div className="encounter-pokemon-section">
+          <div className="encounter-pokemon-section-header">
+            <span className="encounter-property-label">
+              {selectedPokemon.name
+                ? `${selectedPokemon.name} (${selectedPokemon.pokemonName})`
+                : selectedPokemon.pokemonName}
+            </span>
+            {selectedPokemon.isPlayerCharacter && (
+              <Link
+                to={`/Characters/${selectedPokemon.id}`}
+                className="encounter-properties-sheet-link"
+                title="Go to Character Sheet"
+              >
+                <DocumentIcon width={16} height={16} />
+              </Link>
+            )}
+          </div>
+          <div className="encounter-damage-box">
+            <div className="encounter-damage-row">
+              <select
+                className="encounter-damage-select"
+                value={attackingType}
+                onChange={e => setAttackingType(e.target.value)}
+                aria-label="Attacking type"
+              >
+                {ALL_TYPES.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <div className="encounter-damage-type-toggle">
+                <button
+                  className={`encounter-damage-type-btn${damageType === 'Physical' ? ' active' : ''}`}
+                  onClick={() => setDamageType('Physical')}
+                  title="Physical"
+                >
+                  <img src={physicalImg} width={18} height={18} alt="Physical" />
+                </button>
+                <button
+                  className={`encounter-damage-type-btn${damageType === 'Special' ? ' active' : ''}`}
+                  onClick={() => setDamageType('Special')}
+                  title="Special"
+                >
+                  <img src={specialImg} width={18} height={18} alt="Special" />
+                </button>
+              </div>
+            </div>
+            <div className="encounter-damage-row">
+              <input
+                type="number"
+                className="encounter-damage-input"
+                min={0}
+                value={damageAmount}
+                onChange={e => setDamageAmount(Math.max(0, Number(e.target.value)))}
+                onFocus={e => e.target.select()}
+                onKeyDown={e => e.key === 'Enter' && handleDealDamage()}
+                aria-label="Damage amount"
+              />
+              <button
+                className="encounter-damage-button"
+                onClick={handleDealDamage}
+                disabled={damageAmount <= 0}
+              >
+                Damage
+              </button>
+            </div>
+          </div>
+          <div className="encounter-damage-box encounter-heal-box">
+            <div className="encounter-damage-row">
+              <input
+                type="number"
+                className="encounter-damage-input"
+                min={0}
+                value={healAmount}
+                onChange={e => setHealAmount(Math.max(0, Number(e.target.value)))}
+                onFocus={e => e.target.select()}
+                onKeyDown={e => e.key === 'Enter' && handleHeal()}
+                aria-label="Heal amount"
+              />
+              <button
+                className="encounter-damage-button encounter-heal-button"
+                onClick={handleHeal}
+                disabled={healAmount <= 0}
+              >
+                Heal
+              </button>
+            </div>
+          </div>
+          {onRemovePokemon && (
+            <button className="encounter-properties-remove-button" onClick={onRemovePokemon}>
+              <TrashIcon />
+              Remove from Encounter
+            </button>
+          )}
         </div>
       )}
 

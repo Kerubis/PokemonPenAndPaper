@@ -13,6 +13,7 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
         story: encounter.story,
         index: encounter.index,
         finished: encounter.finished,
+        mapDrawing: encounter.mapDrawing,
     };
 }
 
@@ -33,5 +34,6 @@ export function deserializeEncounter(data: SerializedEncounter): Encounter {
         story: data.story ?? '',
         index: data.index ?? 0,
         finished: data.finished ?? false,
+        mapDrawing: data.mapDrawing ?? '',
     });
 }
