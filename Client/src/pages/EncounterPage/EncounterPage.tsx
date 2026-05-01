@@ -13,13 +13,15 @@ import { TurnOrderPanel } from '@/components/domain/TurnOrderPanel';
 import './EncounterPage.css';
 import { EncounterContent } from '@/components/domain/EncounterContent';
 import { DrawingTool } from '@/components/domain/DrawingTool';
+import { sendGameUpdate, updateEncounterDrawing } from '@/features/game/services/gameApi';
+import { serializeEncounter } from '@/features/encounters/utils/serialization';
 
 export const EncounterPage: React.FC = () => {
   const { guid } = useParams<{ guid?: string }>();
   const navigate = useNavigate();
   const selectedEncounterId = guid ?? null;
 
-  const { encounters, setEncounters, pokemon: allPokemon, setPokemon: setAllPokemon } = useGame();
+  const { guid: gameGuid, encounters, setEncounters, pokemon: allPokemon, setPokemon: setAllPokemon } = useGame();
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<{ x: number; y: number } | null>(null);
 
@@ -72,9 +74,15 @@ export const EncounterPage: React.FC = () => {
       if (e.guid !== selectedEncounterIdRef.current) return e;
       const next = typeof updater === 'function' ? updater(e.turnOrder) : updater;
       e.setTurnOrder(next);
+      sendGameUpdate({
+        gameGuid,
+        op: 'set_encounter_turn_order',
+        encounterGuid: e.guid,
+        turnOrder: next ?? null,
+      });
       return e;
     }));
-  }, []);
+  }, [gameGuid]);
 
   const {
     initTurnOrder,
@@ -108,6 +116,7 @@ export const EncounterPage: React.FC = () => {
       name: 'New Encounter'
     });
 
+    sendGameUpdate({ gameGuid, op: 'upsert_encounter', encounter: serializeEncounter(newEncounter) });
     setEncounters(prev => [...prev, newEncounter]);
     navigate(`/Encounter/${newEncounter.guid}`);
   };
@@ -119,6 +128,7 @@ export const EncounterPage: React.FC = () => {
 
   const confirmDelete = () => {
     if (selectedEncounterId) {
+      sendGameUpdate({ gameGuid, op: 'delete_encounter', encounterGuid: selectedEncounterId });
       setEncounters(prev => prev.filter(e => e.guid !== selectedEncounterId));
       const remaining = encounters.filter(e => e.guid !== selectedEncounterId);
       navigate(remaining.length > 0 ? `/Encounter/${remaining[0].guid}` : '/Encounter', { replace: true });
@@ -137,6 +147,7 @@ export const EncounterPage: React.FC = () => {
       type: 'text',
       value: selectedEncounter.name,
       onChange: (value) => {
+        sendGameUpdate({ gameGuid, op: 'set_encounter_name', encounterGuid: selectedEncounter.guid, name: value as string });
         setEncounters(prev => prev.map(e => {
           if (e.guid === selectedEncounter.guid) {
             e.setName(value as string);
@@ -150,6 +161,7 @@ export const EncounterPage: React.FC = () => {
       type: 'checkbox',
       value: selectedEncounter.finished,
       onChange: (value) => {
+        sendGameUpdate({ gameGuid, op: 'set_encounter_finished', encounterGuid: selectedEncounter.guid, finished: value as boolean });
         setEncounters(prev => prev.map(e => {
           if (e.guid === selectedEncounter.guid) {
             e.setFinished(value as boolean);
@@ -176,6 +188,7 @@ export const EncounterPage: React.FC = () => {
     setEncounters(prev => prev.map(e => {
       if (e.guid === selectedEncounterId) {
         e.addPokemon(pokemonId);
+        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: e.pokemonGuids });
       }
       return e;
     }));
@@ -190,6 +203,7 @@ export const EncounterPage: React.FC = () => {
     setEncounters(prev => prev.map(e => {
       if (e.guid === selectedEncounterId) {
         e.removePokemon(selectedPokemon.id);
+        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: e.pokemonGuids });
       }
       return e;
     }));
@@ -215,7 +229,10 @@ export const EncounterPage: React.FC = () => {
             setEncounters(prev => {
               const updated = prev.map(e => {
                 const newIndex = orderedIds.indexOf(e.guid);
-                if (newIndex !== -1) e.setIndex(newIndex);
+                if (newIndex !== -1) {
+                  e.setIndex(newIndex);
+                  sendGameUpdate({ gameGuid, op: 'set_encounter_index', encounterGuid: e.guid, index: newIndex });
+                }
                 return e;
               });
               return [...updated];
@@ -232,6 +249,7 @@ export const EncounterPage: React.FC = () => {
           onAddPokemon={selectedEncounter ? handleAddPokemon : undefined}
           musicLinks={selectedEncounter?.musicLinks ?? []}
           onMusicLinksChange={selectedEncounter ? (links) => {
+            sendGameUpdate({ gameGuid, op: 'set_encounter_music', encounterGuid: selectedEncounter.guid, links });
             setEncounters(prev => prev.map(e => {
               if (e.guid === selectedEncounter.guid) e.setMusicLinks(links);
               return e;
@@ -248,6 +266,7 @@ export const EncounterPage: React.FC = () => {
               <EncounterContent
                 encounter={selectedEncounter}
                 onStoryChange={(story) => {
+                  sendGameUpdate({ gameGuid, op: 'set_encounter_story', encounterGuid: selectedEncounterId!, story });
                   setEncounters(prev => prev.map(e => {
                     if (e.guid === selectedEncounterId) {
                       e.setStory(story);
@@ -260,6 +279,7 @@ export const EncounterPage: React.FC = () => {
                 key={selectedEncounter.guid}
                 initialDrawing={selectedEncounter.mapDrawing}
                 onDrawingChange={(dataUrl) => {
+                  updateEncounterDrawing(selectedEncounterId!, dataUrl);
                   setEncounters(prev => prev.map(e => {
                     if (e.guid === selectedEncounterId) {
                       e.setMapDrawing(dataUrl);

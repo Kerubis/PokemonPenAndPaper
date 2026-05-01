@@ -14,6 +14,7 @@ import {
   saveGameToServer,
   importGameFromServer,
   exportGameAsJson,
+  sendGameUpdate,
 } from '@/features/game/services/gameApi';
 import { serializePokemon } from '@/features/game/utils/serialization';
 import { serializeEncounter } from '@/features/encounters/utils/serialization';
@@ -32,7 +33,7 @@ export interface GameContextValue {
   setPokemon: React.Dispatch<React.SetStateAction<Pokemon[]>>;
   setEncounters: React.Dispatch<React.SetStateAction<Encounter[]>>;
 
-  /** Persist current state to the server immediately */
+  /** Full-replace sync to the server (import / export only) */
   saveNow: () => Promise<void>;
   /** Replace entire game state from a JSON string */
   importGame: (json: string) => Promise<void>;
@@ -52,16 +53,23 @@ export function useGame(): GameContextValue {
 
 // ---- Provider ----------------------------------------------------------------
 
-const SAVE_DEBOUNCE_MS = 800;
-
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [guid, setGuid] = useState(() => crypto.randomUUID());
-  const [gameName, setGameName] = useState('My Pokemon Game');
+  const [gameName, setGameNameRaw] = useState('My Pokemon Game');
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
 
-  // We keep a ref so the debounced save always uses the latest values.
+  const guidRef = useRef(guid);
+  useEffect(() => { guidRef.current = guid; }, [guid]);
+
+  /** Persists the new name to the server and updates local state. */
+  const setGameName = useCallback((name: string) => {
+    setGameNameRaw(name);
+    sendGameUpdate({ gameGuid: guidRef.current, op: 'set_game_name', gameName: name });
+  }, []);
+
+  // Ref so imperative callbacks always see the latest values without re-creating.
   const stateRef = useRef({ guid, gameName, pokemon, encounters });
   useEffect(() => {
     stateRef.current = { guid, gameName, pokemon, encounters };
@@ -74,10 +82,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .then((state: GameState | null) => {
         if (cancelled || !state) return;
         setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
-        setGameName(state.gameName);
-        // Deserialize lazily – the serialized arrays are stored in the
-        // GameState but pages already handle deserialization via hooks, so
-        // we preserve the raw GameState here and decode below.
+        setGameNameRaw(state.gameName);
         import('@/features/game/utils/serialization').then(({ deserializePokemon }) => {
           import('@/features/encounters/utils/serialization').then(({ deserializeEncounter }) => {
             if (cancelled) return;
@@ -93,33 +98,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ---- Debounced auto-save ------------------------------------------------
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const scheduleSave = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      const { guid, gameName, pokemon, encounters } = stateRef.current;
-      saveGameToServer(guid, gameName, pokemon, encounters).catch((err: unknown) =>
-        console.error('[GameContext] Auto-save failed:', err),
-      );
-    }, SAVE_DEBOUNCE_MS);
-  }, []);
-
-  // Trigger save whenever data changes (but not on initial loading).
-  const initialLoadDoneRef = useRef(false);
-  useEffect(() => {
-    if (loading) return;
-    if (!initialLoadDoneRef.current) {
-      initialLoadDoneRef.current = true;
-      return; // skip the first render after load
-    }
-    scheduleSave();
-  }, [loading, pokemon, encounters, gameName, scheduleSave]);
-
   // ---- Imperative save / import / export ----------------------------------
   const saveNow = useCallback(async () => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     const { guid, gameName, pokemon, encounters } = stateRef.current;
     await saveGameToServer(guid, gameName, pokemon, encounters);
   }, []);
@@ -129,7 +109,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { deserializePokemon } = await import('@/features/game/utils/serialization');
     const { deserializeEncounter } = await import('@/features/encounters/utils/serialization');
     setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
-    setGameName(state.gameName);
+    setGameNameRaw(state.gameName);
     setPokemon((state.pokemon ?? []).map(deserializePokemon));
     setEncounters((state.encounters ?? []).map(deserializeEncounter));
   }, []);

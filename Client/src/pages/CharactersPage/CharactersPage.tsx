@@ -8,8 +8,9 @@ import { CharacterSheet } from '@/components/domain/CharacterSheet';
 import { CharacterCard } from '@/components/domain/CharacterCard';
 import { createPokemonById } from '@/features/pokemon/data/pokemonRegistry';
 import { useGame } from '@/contexts/GameContext';
-import type { Pokemon } from '@/features/pokemon/types';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
+import { sendGameUpdate } from '@/features/game/services/gameApi';
+import { serializePokemon } from '@/features/game/utils/serialization';
 import './CharactersPage.css';
 
 export const CharactersPage: React.FC = () => {
@@ -17,7 +18,7 @@ export const CharactersPage: React.FC = () => {
   const navigate = useNavigate();
   const selectedCharacterId = guid ?? null;
 
-  const { pokemon: characters, setPokemon: setCharacters } = useGame();
+  const { pokemon: characters, setPokemon: setCharacters, guid: gameGuid } = useGame();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<{ id: string; x: number; y: number } | null>(null);
 
   // Navigate to first character if none selected
@@ -47,6 +48,7 @@ export const CharactersPage: React.FC = () => {
     });
 
     if (newPokemon) {
+      sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(newPokemon) });
       setCharacters(prev => [...prev, newPokemon]);
       navigate(`/Characters/${newPokemon.id}`);
     }
@@ -68,7 +70,10 @@ export const CharactersPage: React.FC = () => {
       const updated = [...prev];
       orderedIds.forEach((id, idx) => {
         const char = updated.find(c => c.id === id);
-        if (char) char.setIndex(idx);
+        if (char) {
+          char.setIndex(idx);
+          sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(char) });
+        }
       });
       return updated.sort((a, b) => a.index - b.index);
     });
@@ -82,6 +87,7 @@ export const CharactersPage: React.FC = () => {
 
   const confirmDelete = () => {
     if (showDeleteConfirmation) {
+      sendGameUpdate({ gameGuid, op: 'delete_pokemon', pokemonId: showDeleteConfirmation.id });
       setCharacters(prev => prev.filter(c => c.id !== showDeleteConfirmation.id));
       if (selectedCharacterId === showDeleteConfirmation.id) {
         const remaining = characters.filter(c => c.id !== showDeleteConfirmation.id);
@@ -104,23 +110,27 @@ export const CharactersPage: React.FC = () => {
       onChange: (value) => {
         setCharacters(prev => prev.map(c =>
           c.id === selectedCharacter.id
-            ? createPokemonById(c.pokedexEntry, {
-                id: c.id,
-                name: value as string,
-                level: c.level,
-                hp: c.hp,
-                currentHp: c.currentHp,
-                attack: c.attack,
-                specialAttack: c.specialAttack,
-                defense: c.defense,
-                specialDefense: c.specialDefense,
-                speed: c.speed,
-                flaw: c.flaw,
-                strength: c.strength,
-                abilities: c.abilities,
-                isPlayerCharacter: c.isPlayerCharacter,
-                index: c.index
-              }) ?? c
+            ? (() => {
+                const updated = createPokemonById(c.pokedexEntry, {
+                  id: c.id,
+                  name: value as string,
+                  level: c.level,
+                  hp: c.hp,
+                  currentHp: c.currentHp,
+                  attack: c.attack,
+                  specialAttack: c.specialAttack,
+                  defense: c.defense,
+                  specialDefense: c.specialDefense,
+                  speed: c.speed,
+                  flaw: c.flaw,
+                  strength: c.strength,
+                  abilities: c.abilities,
+                  isPlayerCharacter: c.isPlayerCharacter,
+                  index: c.index
+                }) ?? c;
+                if (updated !== c) sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) });
+                return updated;
+              })()
             : c
         ));
       }
@@ -150,7 +160,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setLevel(level);
+            if (updated) { updated.setLevel(level); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -183,7 +193,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setHp(hp);
+            if (updated) { updated.setHp(hp); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -216,7 +226,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setAttack(attack);
+            if (updated) { updated.setAttack(attack); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -249,7 +259,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setSpecialAttack(specialAttack);
+            if (updated) { updated.setSpecialAttack(specialAttack); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -282,7 +292,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setDefense(defense);
+            if (updated) { updated.setDefense(defense); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -315,7 +325,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setSpecialDefense(specialDefense);
+            if (updated) { updated.setSpecialDefense(specialDefense); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -348,7 +358,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setSpeed(speed);
+            if (updated) { updated.setSpeed(speed); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;
@@ -381,7 +391,7 @@ export const CharactersPage: React.FC = () => {
               isPlayerCharacter: c.isPlayerCharacter,
               index: c.index
             });
-            if (updated) if (updated) updated.setIsPlayerCharacter(isPlayerCharacter);
+            if (updated) { updated.setIsPlayerCharacter(isPlayerCharacter); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
             return updated ?? c;
           }
           return c;

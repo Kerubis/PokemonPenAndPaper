@@ -10,6 +10,7 @@ import type {
   SerializedTurnOrderEntry,
   SerializedTurnEffect,
 } from '../types/GameState';
+import type { GameUpdatePayload } from '../ws/wsTypes';
 
 // ---- Load ----------------------------------------------------------------
 
@@ -258,6 +259,205 @@ export async function saveGame(state: GameState): Promise<GameState> {
   } catch (err) {
     await conn.rollback();
     throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+// ---- Partial updates ----------------------------------------------------
+
+export async function updateEncounterDrawing(
+  encounterGuid: string,
+  mapDrawing: string,
+): Promise<void> {
+  const conn = await pool.getConnection();
+  try {
+    await conn.execute(
+      'UPDATE encounters SET map_drawing = ? WHERE guid = ?',
+      [mapDrawing, encounterGuid],
+    );
+  } finally {
+    conn.release();
+  }
+}
+
+// ---- Targeted game updates -----------------------------------------------
+
+export async function applyGameUpdate(payload: GameUpdatePayload): Promise<void> {
+  const conn = await pool.getConnection();
+  try {
+    const { gameGuid, op } = payload;
+
+    switch (op) {
+
+      case 'set_game_name':
+        await conn.execute(
+          'UPDATE games SET game_name = ? WHERE guid = ?',
+          [payload.gameName, gameGuid],
+        );
+        break;
+
+      case 'upsert_encounter': {
+        const e = payload.encounter;
+        await conn.execute(
+          `INSERT INTO encounters (guid, game_guid, name, story, idx, finished, map_drawing)
+           VALUES (?,?,?,?,?,?,?)
+           ON DUPLICATE KEY UPDATE
+             name = VALUES(name), story = VALUES(story), idx = VALUES(idx),
+             finished = VALUES(finished), map_drawing = VALUES(map_drawing)`,
+          [e.guid, gameGuid, e.name, e.story ?? '', e.index, e.finished, e.mapDrawing ?? ''],
+        );
+        await conn.execute('DELETE FROM encounter_music_links WHERE encounter_guid = ?', [e.guid]);
+        for (const ml of (e.musicLinks ?? [])) {
+          await conn.execute(
+            'INSERT INTO encounter_music_links (encounter_guid, url, description) VALUES (?,?,?)',
+            [e.guid, ml.url, ml.description ?? ''],
+          );
+        }
+        await conn.execute('DELETE FROM encounter_pokemon WHERE encounter_guid = ?', [e.guid]);
+        for (const pId of (e.pokemonGuids ?? [])) {
+          await conn.execute(
+            'INSERT INTO encounter_pokemon (encounter_guid, pokemon_id) VALUES (?,?)',
+            [e.guid, pId],
+          );
+        }
+        break;
+      }
+
+      case 'delete_encounter':
+        await conn.execute(
+          'DELETE FROM encounters WHERE guid = ? AND game_guid = ?',
+          [payload.encounterGuid, gameGuid],
+        );
+        break;
+
+      case 'set_encounter_name':
+        await conn.execute(
+          'UPDATE encounters SET name = ? WHERE guid = ? AND game_guid = ?',
+          [payload.name, payload.encounterGuid, gameGuid],
+        );
+        break;
+
+      case 'set_encounter_finished':
+        await conn.execute(
+          'UPDATE encounters SET finished = ? WHERE guid = ? AND game_guid = ?',
+          [payload.finished, payload.encounterGuid, gameGuid],
+        );
+        break;
+
+      case 'set_encounter_story':
+        await conn.execute(
+          'UPDATE encounters SET story = ? WHERE guid = ? AND game_guid = ?',
+          [payload.story, payload.encounterGuid, gameGuid],
+        );
+        break;
+
+      case 'set_encounter_index':
+        await conn.execute(
+          'UPDATE encounters SET idx = ? WHERE guid = ? AND game_guid = ?',
+          [payload.index, payload.encounterGuid, gameGuid],
+        );
+        break;
+
+      case 'set_encounter_music': {
+        await conn.execute(
+          'DELETE FROM encounter_music_links WHERE encounter_guid = ?',
+          [payload.encounterGuid],
+        );
+        for (const ml of payload.links) {
+          await conn.execute(
+            'INSERT INTO encounter_music_links (encounter_guid, url, description) VALUES (?,?,?)',
+            [payload.encounterGuid, ml.url, ml.description ?? ''],
+          );
+        }
+        break;
+      }
+
+      case 'set_encounter_pokemon': {
+        await conn.execute(
+          'DELETE FROM encounter_pokemon WHERE encounter_guid = ?',
+          [payload.encounterGuid],
+        );
+        for (const pId of payload.pokemonGuids) {
+          await conn.execute(
+            'INSERT INTO encounter_pokemon (encounter_guid, pokemon_id) VALUES (?,?)',
+            [payload.encounterGuid, pId],
+          );
+        }
+        break;
+      }
+
+      case 'set_encounter_turn_order': {
+        await conn.execute(
+          'DELETE FROM turn_orders WHERE encounter_guid = ?',
+          [payload.encounterGuid],
+        );
+        if (payload.turnOrder) {
+          const [toResult]: any = await conn.execute(
+            'INSERT INTO turn_orders (encounter_guid, current_round, current_index) VALUES (?,?,?)',
+            [payload.encounterGuid, payload.turnOrder.currentRound, payload.turnOrder.currentIndex],
+          );
+          const turnOrderId = toResult.insertId;
+          for (const entry of (payload.turnOrder.entries ?? [])) {
+            await conn.execute(
+              `INSERT INTO turn_order_entries
+                 (turn_order_id, pokemon_id, base_initiative, initiative_override)
+               VALUES (?,?,?,?)`,
+              [turnOrderId, entry.pokemonId, entry.baseInitiative, entry.initiativeOverride ?? null],
+            );
+          }
+          for (const effect of (payload.turnOrder.effects ?? [])) {
+            await conn.execute(
+              `INSERT INTO turn_effects
+                 (turn_order_id, effect_id, name, description, remaining_rounds, pokemon_id)
+               VALUES (?,?,?,?,?,?)`,
+              [turnOrderId, effect.id, effect.name, effect.description ?? null, effect.remainingRounds, effect.pokemonId ?? null],
+            );
+          }
+        }
+        break;
+      }
+
+      case 'upsert_pokemon': {
+        const p = payload.pokemon;
+        await conn.execute(
+          `INSERT INTO pokemon
+             (id, game_guid, pokedex_entry, name, level, hp, current_hp,
+              attack, special_attack, defense, special_defense, speed,
+              walk_speed, swim_speed, climb_speed, fly_speed, is_player_character, idx)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+           ON DUPLICATE KEY UPDATE
+             pokedex_entry=VALUES(pokedex_entry), name=VALUES(name), level=VALUES(level),
+             hp=VALUES(hp), current_hp=VALUES(current_hp), attack=VALUES(attack),
+             special_attack=VALUES(special_attack), defense=VALUES(defense),
+             special_defense=VALUES(special_defense), speed=VALUES(speed),
+             walk_speed=VALUES(walk_speed), swim_speed=VALUES(swim_speed),
+             climb_speed=VALUES(climb_speed), fly_speed=VALUES(fly_speed),
+             is_player_character=VALUES(is_player_character), idx=VALUES(idx)`,
+          [
+            p.id, gameGuid, p.pokedexEntry, p.name, p.level, p.hp, p.currentHp,
+            p.attack, p.specialAttack, p.defense, p.specialDefense, p.speed,
+            p.walkSpeed, p.swimSpeed, p.climbSpeed, p.flySpeed, p.isPlayerCharacter, p.index,
+          ],
+        );
+        await conn.execute('DELETE FROM pokemon_abilities WHERE pokemon_id = ?', [p.id]);
+        for (const a of p.abilities) {
+          await conn.execute(
+            `INSERT INTO pokemon_abilities (pokemon_id, name, type, accuracy, damage_type, damage)
+             VALUES (?,?,?,?,?,?)`,
+            [p.id, a.name, a.type, a.accuracy, a.damageType, a.damage],
+          );
+        }
+        break;
+      }
+
+      case 'delete_pokemon':
+        await conn.execute(
+          'DELETE FROM pokemon WHERE id = ? AND game_guid = ?',
+          [payload.pokemonId, gameGuid],
+        );
+        break;
+    }
   } finally {
     conn.release();
   }
