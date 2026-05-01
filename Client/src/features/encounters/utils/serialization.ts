@@ -1,5 +1,6 @@
 import { Encounter } from '../types/Encounter';
 import type { SerializedEncounter } from '../../game/types/GameState';
+import type { TurnOrder } from '../types/TurnOrder';
 
 /**
  * Serialize an Encounter instance to a plain object for storage
@@ -14,6 +15,7 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
         index: encounter.index,
         finished: encounter.finished,
         mapDrawing: encounter.mapDrawing,
+        turnOrder: encounter.turnOrder ?? undefined,
     };
 }
 
@@ -35,5 +37,6 @@ export function deserializeEncounter(data: SerializedEncounter): Encounter {
         index: data.index ?? 0,
         finished: data.finished ?? false,
         mapDrawing: data.mapDrawing ?? '',
+        turnOrder: (data.turnOrder as TurnOrder | undefined) ?? null,
     });
 }

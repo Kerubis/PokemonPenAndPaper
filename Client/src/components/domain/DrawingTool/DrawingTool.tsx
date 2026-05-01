@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { ConfirmPopover } from '../../ui/ConfirmPopover';
 import './DrawingTool.css';
 
 interface DrawingToolProps {
@@ -8,6 +9,8 @@ interface DrawingToolProps {
 
 const PALETTE_COLORS = [
     '#1a1a1a', // Black
+    '#888888', // Grey
+    '#cccccc', // Light Grey
     '#ffffff', // White
     '#e74c3c', // Red
     '#e67e22', // Orange
@@ -25,12 +28,14 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawing = useRef(false);
     const lastPos = useRef<{ x: number; y: number } | null>(null);
+    const prevEraser = useRef(false);
     const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [color, setColor] = useState('#1a1a1a');
     const [brushSize, setBrushSize] = useState(2);
     const [eraser, setEraser] = useState(false);
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
+    const [clearAnchor, setClearAnchor] = useState<{ x: number; y: number } | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     // Scale canvas to devicePixelRatio for crisp rendering, then draw initial image
@@ -90,6 +95,10 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         e.preventDefault();
+        if ('button' in e && e.button === 2) {
+            prevEraser.current = eraser;
+            setEraser(true);
+        }
         isDrawing.current = true;
         lastPos.current = getPos(e);
     };
@@ -117,7 +126,10 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
         scheduleSave();
     };
 
-    const stopDrawing = () => {
+    const stopDrawing = (e?: React.MouseEvent<HTMLCanvasElement>) => {
+        if (e && 'button' in e && e.button === 2) {
+            setEraser(prevEraser.current);
+        }
         isDrawing.current = false;
         lastPos.current = null;
     };
@@ -132,7 +144,20 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
 
     const handleCanvasMouseLeave = () => {
         setCursorPos(null);
+        if (isDrawing.current) setEraser(prevEraser.current);
         stopDrawing();
+    };
+
+    const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
+        const currentIndex = BRUSH_SIZES.indexOf(brushSize);
+        if (e.deltaY < 0) {
+            // scroll up → increase size
+            if (currentIndex < BRUSH_SIZES.length - 1) setBrushSize(BRUSH_SIZES[currentIndex + 1]);
+        } else {
+            // scroll down → decrease size
+            if (currentIndex > 0) setBrushSize(BRUSH_SIZES[currentIndex - 1]);
+        }
     };
 
     const handleClear = () => {
@@ -141,6 +166,7 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
         if (!canvas || !ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         onDrawingChange?.('');
+        setClearAnchor(null);
     };
 
     return (
@@ -183,13 +209,23 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
                     </button>
                     <button
                         className="drawing-tool-clear-btn"
-                        onClick={handleClear}
+                        onClick={(e) => setClearAnchor({ x: e.clientX, y: e.clientY })}
                         title="Clear canvas"
                     >
                         Clear
                     </button>
                 </div>
             </div>
+            {clearAnchor && (
+                <ConfirmPopover
+                    x={clearAnchor.x}
+                    y={clearAnchor.y}
+                    message="Clear the entire canvas?"
+                    confirmLabel="Clear"
+                    onConfirm={handleClear}
+                    onCancel={() => setClearAnchor(null)}
+                />
+            )}
             <div className="drawing-tool-canvas-wrapper" ref={wrapperRef}>
                 {cursorPos && (
                     <span
@@ -209,11 +245,13 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
                     className="drawing-tool-canvas"
                     onMouseDown={startDrawing}
                     onMouseMove={handleCanvasMouseMove}
-                    onMouseUp={stopDrawing}
+                    onMouseUp={(e) => stopDrawing(e)}
                     onMouseLeave={handleCanvasMouseLeave}
+                    onWheel={handleWheel}
+                    onContextMenu={(e) => e.preventDefault()}
                     onTouchStart={startDrawing}
                     onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
+                    onTouchEnd={() => stopDrawing()}
                 />
             </div>
         </div>

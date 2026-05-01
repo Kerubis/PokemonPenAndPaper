@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EncounterToolbar } from '@/components/domain/EncounterToolbar';
 import { EncounterSidePanel } from '@/components/domain/EncounterSidePanel';
 import type { EncounterPropertyField } from '@/components/domain/EncounterSidePanel';
 import { Encounter } from '@/features/encounters/types/Encounter';
 import { useTurnOrder } from '@/features/encounters';
+import type { TurnOrder } from '@/features/encounters/types/TurnOrder';
 import { loadEncounters, loadPokemon, updateGame, loadGame } from '@/features/game';
 import type { Pokemon } from '@/features/pokemon/types';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
@@ -59,8 +60,24 @@ export const EncounterPage: React.FC = () => {
     window.addEventListener('mouseup', onMouseUp);
   };
 
+  const selectedEncounter = encounters.find(e => e.guid === selectedEncounterId);
+  const turnOrder = selectedEncounter?.turnOrder ?? null;
+
+  // Stable ref so the setter callback never needs to be recreated
+  const selectedEncounterIdRef = useRef<string | null>(null);
+  selectedEncounterIdRef.current = selectedEncounterId;
+
+  // Write turn order directly into the owning encounter
+  const setEncounterTurnOrder = useCallback((updater: TurnOrder | null | ((prev: TurnOrder | null) => TurnOrder | null)) => {
+    setEncounters(prev => prev.map(e => {
+      if (e.guid !== selectedEncounterIdRef.current) return e;
+      const next = typeof updater === 'function' ? updater(e.turnOrder) : updater;
+      e.setTurnOrder(next);
+      return e;
+    }));
+  }, []);
+
   const {
-    turnOrder,
     initTurnOrder,
     endTurnOrder,
     nextTurn,
@@ -71,7 +88,7 @@ export const EncounterPage: React.FC = () => {
     removeEffect,
     addPokemonToTurnOrder,
     removePokemonFromTurnOrder,
-  } = useTurnOrder();
+  } = useTurnOrder(setEncounterTurnOrder);
 
   // Load encounters and pokemon from storage on mount
   useEffect(() => {
@@ -105,13 +122,10 @@ export const EncounterPage: React.FC = () => {
     }
   }, [allPokemon]);
 
-  const selectedEncounter = encounters.find(e => e.guid === selectedEncounterId);
-
-  // Reset selected pokemon and turn order when encounter changes
+  // Switch encounter – turn order is stored on the encounter itself, no explicit save/restore needed
   const handleSelectEncounter = (id: string) => {
     navigate(`/Encounter/${id}`);
     setSelectedPokemon(null);
-    endTurnOrder();
   };
 
   // Handle creating a new encounter

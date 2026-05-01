@@ -32,6 +32,27 @@ export interface SerializedMusicLink {
   description: string;
 }
 
+export interface SerializedTurnOrderEntry {
+  pokemonId: string;
+  baseInitiative: number;
+  initiativeOverride: number | null;
+}
+
+export interface SerializedTurnEffect {
+  id: string;
+  name: string;
+  description?: string;
+  remainingRounds: number;
+  pokemonId?: string;
+}
+
+export interface SerializedTurnOrder {
+  entries: SerializedTurnOrderEntry[];
+  currentRound: number;
+  currentIndex: number;
+  effects: SerializedTurnEffect[];
+}
+
 export interface SerializedEncounter {
   guid: string;
   name: string;
@@ -42,6 +63,7 @@ export interface SerializedEncounter {
   index: number;
   finished: boolean;
   mapDrawing?: string;
+  turnOrder?: SerializedTurnOrder;
 }
 
 export interface GameState {

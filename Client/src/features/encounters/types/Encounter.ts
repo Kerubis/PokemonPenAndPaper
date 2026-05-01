@@ -1,3 +1,5 @@
+import type { TurnOrder } from './TurnOrder';
+
 export interface MusicLink {
     url: string;
     description: string;
@@ -12,6 +14,7 @@ export class Encounter {
     private _index: number;
     private _finished: boolean;
     private _mapDrawing: string;
+    private _turnOrder: TurnOrder | null;
 
     constructor(
         {
@@ -23,6 +26,7 @@ export class Encounter {
             index = 0,
             finished = false,
             mapDrawing = "",
+            turnOrder = null,
         }: {
             guid?: string;
             name?: string;
@@ -32,6 +36,7 @@ export class Encounter {
             index?: number;
             finished?: boolean;
             mapDrawing?: string;
+            turnOrder?: TurnOrder | null;
         } = {}
     ) {
         this._guid = guid;
@@ -42,6 +47,7 @@ export class Encounter {
         this._index = index;
         this._finished = finished;
         this._mapDrawing = mapDrawing;
+        this._turnOrder = turnOrder;
     }
 
     // Getters
@@ -75,6 +81,10 @@ export class Encounter {
 
     get mapDrawing(): string {
         return this._mapDrawing;
+    }
+
+    get turnOrder(): TurnOrder | null {
+        return this._turnOrder;
     }
 
     // Setters
@@ -114,6 +124,10 @@ export class Encounter {
 
     setMapDrawing(mapDrawing: string): void {
         this._mapDrawing = mapDrawing;
+    }
+
+    setTurnOrder(turnOrder: TurnOrder | null): void {
+        this._turnOrder = turnOrder;
     }
 
     // Pokemon management

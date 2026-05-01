@@ -56,7 +56,6 @@ export const RulesPage: React.FC = () => {
                   <div className="rules-skill-group-header physical">Physical <span>(+ Attack)</span></div>
                   <ul>
                     <li>Athletics</li>
-                    <li>Dexterity</li>
                     <li>Acrobatics</li>
                     <li>Sleight of Hand</li>
                     <li>Stealth</li>
@@ -66,14 +65,11 @@ export const RulesPage: React.FC = () => {
                 <div className="rules-skill-group">
                   <div className="rules-skill-group-header mental">Mental <span>(+ Sp. Attack)</span></div>
                   <ul>
-                    <li>History</li>
-                    <li>Investigation</li>
-                    <li>Nature</li>
-                    <li>Insight</li>
-                    <li>Medicine</li>
                     <li>Perception</li>
-                    <li>Survival</li>
+                    <li>Knowledge</li>
+                    <li>Insight</li>
                     <li>Conversation</li>
+                    <li>Medicine</li>
                   </ul>
                 </div>
               </div>
@@ -122,11 +118,16 @@ export const RulesPage: React.FC = () => {
               <ol>
                 <li>Declare the ability and its target.</li>
                 <li>Roll <strong>d20</strong>. If the result ≥ the ability's <strong>Accuracy</strong>, the attack hits.</li>
-                <li>Roll the ability's <strong>Damage dice</strong>.</li>
+                <li>Roll the ability's <strong>Damage dice + modifiers</strong>.</li>
                 <li>Apply <strong>type effectiveness</strong> (see table below).</li>
-                <li>Subtract the defender's relevant Defense stat from the final total (minimum 1).</li>
+                <li>Subtract the defender's Defense modifiers.</li>
                 <li>Reduce the defender's HP by that amount.</li>
               </ol>
+              <p>
+                <strong>Critical Hit:</strong> A d20 result of <strong>20</strong> is a critical hit — the attack
+                hits automatically regardless of Accuracy. Damage is calculated as{' '}
+                <strong>damage dice roll + maximum damage dice value + modifiers</strong>.
+              </p>
             </section>
 
             <section className="rules-section">

@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import type { Pokemon } from '@/features/pokemon/types';
 import type { TurnOrder, TurnOrderEntry, TurnEffect } from '../types/TurnOrder';
 import { getEffectiveInitiative, getBaseInitiative } from '../types/TurnOrder';
+
+type TurnOrderUpdater = TurnOrder | null | ((prev: TurnOrder | null) => TurnOrder | null);
 
 function buildEntries(pokemon: Pokemon[]): TurnOrderEntry[] {
     return [...pokemon]
@@ -23,9 +25,9 @@ function tickMatching(
         .filter(e => e.remainingRounds !== 0);
 }
 
-export function useTurnOrder() {
-    const [turnOrder, setTurnOrder] = useState<TurnOrder | null>(null);
-
+export function useTurnOrder(
+    setTurnOrder: (updater: TurnOrderUpdater) => void,
+) {
     /** Start a new battle, computing base initiatives from the pokemon list. */
     const initTurnOrder = useCallback((pokemon: Pokemon[]) => {
         setTurnOrder({
@@ -203,7 +205,6 @@ export function useTurnOrder() {
     }, []);
 
     return {
-        turnOrder,
         initTurnOrder,
         endTurnOrder,
         nextTurn,
