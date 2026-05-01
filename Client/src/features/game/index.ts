@@ -1,3 +1,3 @@
 export * from './types';
-export * from './services/gameStorage';
+export * from './services/gameApi';
 export * from './utils/serialization';

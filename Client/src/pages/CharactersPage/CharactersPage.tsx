@@ -7,7 +7,7 @@ import type { PropertyField } from '@/components/domain/CharacterPropertiesPanel
 import { CharacterSheet } from '@/components/domain/CharacterSheet';
 import { CharacterCard } from '@/components/domain/CharacterCard';
 import { createPokemonById } from '@/features/pokemon/data/pokemonRegistry';
-import { loadPokemon, loadEncounters, updateGame, loadGame } from '@/features/game';
+import { useGame } from '@/contexts/GameContext';
 import type { Pokemon } from '@/features/pokemon/types';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
 import './CharactersPage.css';
@@ -17,28 +17,15 @@ export const CharactersPage: React.FC = () => {
   const navigate = useNavigate();
   const selectedCharacterId = guid ?? null;
 
-  const [characters, setCharacters] = useState<Pokemon[]>([]);
+  const { pokemon: characters, setPokemon: setCharacters } = useGame();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<{ id: string; x: number; y: number } | null>(null);
 
-  // Load characters from storage on mount
+  // Navigate to first character if none selected
   useEffect(() => {
-    const loadedCharacters = loadPokemon();
-    setCharacters(loadedCharacters);
-    if (loadedCharacters.length > 0 && !guid) {
-      navigate(`/Characters/${loadedCharacters[0].id}`, { replace: true });
+    if (characters.length > 0 && !guid) {
+      navigate(`/Characters/${characters[0].id}`, { replace: true });
     }
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save characters to storage whenever they change
-  useEffect(() => {
-    if (characters.length > 0) {
-      const gameState = loadGame();
-      const gameGuid = gameState?.guid || crypto.randomUUID();
-      const gameName = gameState?.gameName || 'My Pokemon Game';
-      const encounters = loadEncounters();
-      updateGame(gameGuid, gameName, characters, encounters);
-    }
-  }, [characters]);
+  }, [characters, guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
 

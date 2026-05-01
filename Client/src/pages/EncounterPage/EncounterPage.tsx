@@ -6,7 +6,7 @@ import type { EncounterPropertyField } from '@/components/domain/EncounterSidePa
 import { Encounter } from '@/features/encounters/types/Encounter';
 import { useTurnOrder } from '@/features/encounters';
 import type { TurnOrder } from '@/features/encounters/types/TurnOrder';
-import { loadEncounters, loadPokemon, updateGame, loadGame } from '@/features/game';
+import { useGame } from '@/contexts/GameContext';
 import type { Pokemon } from '@/features/pokemon/types';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
 import { TurnOrderPanel } from '@/components/domain/TurnOrderPanel';
@@ -19,8 +19,7 @@ export const EncounterPage: React.FC = () => {
   const navigate = useNavigate();
   const selectedEncounterId = guid ?? null;
 
-  const [encounters, setEncounters] = useState<Encounter[]>([]);
-  const [allPokemon, setAllPokemon] = useState<Pokemon[]>([]);
+  const { encounters, setEncounters, pokemon: allPokemon, setPokemon: setAllPokemon } = useGame();
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<{ x: number; y: number } | null>(null);
 
@@ -90,37 +89,12 @@ export const EncounterPage: React.FC = () => {
     removePokemonFromTurnOrder,
   } = useTurnOrder(setEncounterTurnOrder);
 
-  // Load encounters and pokemon from storage on mount
+  // Navigate to first encounter if none selected
   useEffect(() => {
-    const loadedEncounters = loadEncounters();
-    const loadedPokemon = loadPokemon();
-    setEncounters(loadedEncounters);
-    setAllPokemon(loadedPokemon);
-    if (loadedEncounters.length > 0 && !guid) {
-      navigate(`/Encounter/${loadedEncounters[0].guid}`, { replace: true });
+    if (encounters.length > 0 && !guid) {
+      navigate(`/Encounter/${encounters[0].guid}`, { replace: true });
     }
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save encounters to storage whenever they change
-  useEffect(() => {
-    if (encounters.length > 0) {
-      const gameState = loadGame();
-      const gameGuid = gameState?.guid || crypto.randomUUID();
-      const gameName = gameState?.gameName || 'My Pokemon Game';
-      updateGame(gameGuid, gameName, allPokemon, encounters);
-    }
-  }, [encounters]);
-
-  // Save pokemon to storage whenever they change (e.g. damage dealt)
-  useEffect(() => {
-    if (allPokemon.length > 0) {
-      const gameState = loadGame();
-      const gameGuid = gameState?.guid || crypto.randomUUID();
-      const gameName = gameState?.gameName || 'My Pokemon Game';
-      const currentEncounters = loadEncounters();
-      updateGame(gameGuid, gameName, allPokemon, currentEncounters);
-    }
-  }, [allPokemon]);
+  }, [encounters, guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Switch encounter – turn order is stored on the encounter itself, no explicit save/restore needed
   const handleSelectEncounter = (id: string) => {

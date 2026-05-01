@@ -1,44 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadPokemon, loadEncounters, loadGame, exportGameAsJson, importGameFromJson } from '@/features/game';
-import type { Pokemon } from '@/features/pokemon/types';
-import type { Encounter } from '@/features/encounters';
+import { useGame } from '@/contexts/GameContext';
 import { formatPokedexNumber } from '@/lib/utils';
 import './HomePage.css';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [playerCharacters, setPlayerCharacters] = useState<Pokemon[]>([]);
-  const [activeEncounters, setActiveEncounters] = useState<Encounter[]>([]);
-  const [gameName, setGameName] = useState<string>('');
+  const { gameName, setGameName, pokemon, encounters, importGame, exportGame } = useGame();
   const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState<string>('');
+  const [nameInput, setNameInput] = useState<string>(gameName);
   const importInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const allPokemon = loadPokemon();
-    const allEncounters = loadEncounters();
-    setPlayerCharacters(allPokemon.filter(p => p.isPlayerCharacter));
-    setActiveEncounters(allEncounters.filter(e => !e.finished));
-    const gameState = loadGame();
-    const name = gameState?.gameName ?? 'My Pokemon Game';
-    setGameName(name);
-    setNameInput(name);
-  }, []);
+  const playerCharacters = useMemo(() => pokemon.filter(p => p.isPlayerCharacter), [pokemon]);
+  const activeEncounters = useMemo(() => encounters.filter(e => !e.finished), [encounters]);
 
   const commitName = () => {
     const trimmed = nameInput.trim() || 'My Pokemon Game';
     setGameName(trimmed);
     setEditingName(false);
-    const gameState = loadGame();
-    if (gameState) {
-      importGameFromJson(JSON.stringify({ ...gameState, gameName: trimmed }));
-    }
   };
 
   const handleExport = () => {
-    const json = exportGameAsJson();
-    if (!json) return;
+    const json = exportGame();
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -53,20 +36,8 @@ export const HomePage: React.FC = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      try {
-        const json = ev.target?.result as string;
-        importGameFromJson(json);
-        const allPokemon = loadPokemon();
-        const allEncounters = loadEncounters();
-        const gameState = loadGame();
-        setPlayerCharacters(allPokemon.filter(p => p.isPlayerCharacter));
-        setActiveEncounters(allEncounters.filter(e => !e.finished));
-        const name = gameState?.gameName ?? 'My Pokemon Game';
-        setGameName(name);
-        setNameInput(name);
-      } catch {
-        alert('Failed to import: invalid game file.');
-      }
+      const json = ev.target?.result as string;
+      importGame(json).catch(() => alert('Failed to import: invalid game file.'));
     };
     reader.readAsText(file);
     e.target.value = '';

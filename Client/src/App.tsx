@@ -6,6 +6,7 @@ import { CharactersPage } from './pages/CharactersPage'
 import { EncounterPage } from './pages/EncounterPage'
 import { RulesPage } from './pages/RulesPage'
 import { MusicProvider } from './contexts/MusicContext'
+import { GameProvider } from './contexts/GameContext'
 
 function AppInner() {
   return (
@@ -30,7 +31,9 @@ function AppInner() {
 function App() {
   return (
     <MusicProvider>
-      <AppInner />
+      <GameProvider>
+        <AppInner />
+      </GameProvider>
     </MusicProvider>
   );
 }
