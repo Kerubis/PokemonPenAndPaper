@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { TurnOrder, TurnEffect } from '@/features/encounters/types/TurnOrder';
 import { getEffectiveInitiative, getBaseInitiative } from '@/features/encounters/types/TurnOrder';
 import type { Pokemon } from '@/features/pokemon/types';
+import { getMaxHp } from '@/features/pokemon/types/pokemonOps';
 import { CharacterCard } from '@/components/domain/CharacterCard';
 import { PlusIcon, TrashIcon, MinusIcon } from '@/components/ui/icons';
 import './TurnOrderPanel.css';
@@ -225,7 +226,7 @@ export const TurnOrderPanel: React.FC<TurnOrderPanelProps> = ({
                                                 type1={p.type1}
                                                 type2={p.type2 ?? undefined}
                                                 currentHp={p.currentHp}
-                                                maxHp={p.maxHp}
+                                                maxHp={getMaxHp(p)}
                                                 isActive={p.id === selectedPokemonId}
                                                 onClick={() => onSelectPokemon?.(p)}
                                             />
@@ -322,7 +323,7 @@ export const TurnOrderPanel: React.FC<TurnOrderPanelProps> = ({
                                             type1={p.type1}
                                             type2={p.type2 ?? undefined}
                                             currentHp={p.currentHp}
-                                            maxHp={p.maxHp}
+                                            maxHp={getMaxHp(p)}
                                             isActive={p.id === selectedPokemonId}
                                             onClick={() => onSelectPokemon?.(p)}
                                         />

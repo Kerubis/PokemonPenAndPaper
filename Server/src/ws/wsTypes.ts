@@ -3,6 +3,8 @@
 // ============================================================
 
 export type WsMessageType =
+  | 'LIST_GAMES'
+  | 'GAMES_LISTED'
   | 'LOAD_GAME'
   | 'GAME_LOADED'
   | 'SAVE_GAME'

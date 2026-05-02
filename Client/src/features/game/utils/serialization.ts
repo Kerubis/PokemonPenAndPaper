@@ -1,5 +1,5 @@
-import { Pokemon } from "../../pokemon/types/Pokemon";
-import { Ability } from "../../abilities/types/Ability";
+import type { Pokemon } from "../../pokemon/types/Pokemon";
+import type { Ability } from "../../abilities/types/Ability";
 import { PokemonType } from "../../pokemon/types/Type";
 import type { SerializedPokemon, SerializedAbility } from "../types/GameState";
 import { getAbilityByName } from "../../abilities/data";
@@ -28,15 +28,15 @@ function deserializeAbility(data: SerializedAbility): Ability {
     return registeredAbility;
   }
 
-  // If not found, create a new instance (for custom abilities)
+  // If not found, create a plain object (for custom abilities)
   const type = PokemonType[data.type as keyof typeof PokemonType];
-  return new Ability(
-    data.name,
+  return {
+    name: data.name,
     type,
-    data.accuracy,
-    data.damageType as any,
-    data.damage
-  );
+    accuracy: data.accuracy,
+    damageType: data.damageType as Ability['damageType'],
+    damage: data.damage,
+  };
 }
 
 /**

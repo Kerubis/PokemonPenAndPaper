@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 import './Menu.css';
 import { HomeIcon, PokeballIcon, BattleIcon, DocumentIcon, MusicIcon } from '@/components/ui/icons';
 import { useMusicContext } from '@/contexts/MusicContext';
@@ -9,19 +9,22 @@ export const Menu: React.FC = () => {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `menu-item${isActive ? ' active' : ''}`;
 
+  const { gameId } = useParams<{ gameId: string }>();
+  const base = `/${gameId}`;
+
   const { currentLink, isPlaying } = useMusicContext();
   const [musicOpen, setMusicOpen] = useState(false);
 
   return (
     <div className="app-menu">
       <div className="menu-items-top">
-        <NavLink className={navClass} to="/Home" title="Home">
+        <NavLink className={navClass} to={`${base}/Home`} title="Home">
           <HomeIcon />
         </NavLink>
-        <NavLink className={navClass} to="/Characters" title="Characters">
+        <NavLink className={navClass} to={`${base}/Characters`} title="Characters">
           <PokeballIcon />
         </NavLink>
-        <NavLink className={navClass} to="/Encounter" title="Encounter">
+        <NavLink className={navClass} to={`${base}/Encounter`} title="Encounter">
           <BattleIcon />
         </NavLink>
       </div>
@@ -34,7 +37,7 @@ export const Menu: React.FC = () => {
           <MusicIcon />
           {currentLink && <span className={`menu-music-indicator${isPlaying ? '' : ' menu-music-indicator--paused'}`} />}
         </button>
-        <NavLink className={navClass} to="/Rules" title="Rules">
+        <NavLink className={navClass} to={`${base}/Rules`} title="Rules">
           <DocumentIcon />
         </NavLink>
       </div>

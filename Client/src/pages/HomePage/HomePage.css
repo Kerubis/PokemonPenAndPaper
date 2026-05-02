@@ -73,6 +73,18 @@
   border-color: #777;
 }
 
+.home-page-action-btn--exit {
+  margin-left: 8px;
+  border-color: #7a4040;
+  color: #e08080;
+}
+
+.home-page-action-btn--exit:hover {
+  background-color: #4a2e2e;
+  border-color: #c06060;
+  color: #f0a0a0;
+}
+
 .home-page-columns {
   display: flex;
   flex-direction: row;

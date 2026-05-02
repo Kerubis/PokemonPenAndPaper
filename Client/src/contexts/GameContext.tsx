@@ -16,14 +16,16 @@ import {
   exportGameAsJson,
   sendGameUpdate,
 } from '@/features/game/services/gameApi';
-import { serializePokemon } from '@/features/game/utils/serialization';
-import { serializeEncounter } from '@/features/encounters/utils/serialization';
+import { serializePokemon, deserializePokemon } from '@/features/game/utils/serialization';
+import { serializeEncounter, deserializeEncounter } from '@/features/encounters/utils/serialization';
 
 // ---- Types ----------------------------------------------------------------
 
 export interface GameContextValue {
   /** Whether the initial load from the server is still in progress */
   loading: boolean;
+  /** True when the load completed but the requested game guid was not found */
+  notFound: boolean;
   guid: string;
   gameName: string;
   pokemon: Pokemon[];
@@ -53,8 +55,9 @@ export function useGame(): GameContextValue {
 
 // ---- Provider ----------------------------------------------------------------
 
-export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GameProvider: React.FC<{ children: React.ReactNode; gameId?: string }> = ({ children, gameId }) => {
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [guid, setGuid] = useState(() => crypto.randomUUID());
   const [gameName, setGameNameRaw] = useState('My Pokemon Game');
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
@@ -78,25 +81,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ---- Initial load from server -------------------------------------------
   useEffect(() => {
     let cancelled = false;
-    loadGameFromServer()
+    loadGameFromServer(gameId)
       .then((state: GameState | null) => {
-        if (cancelled || !state) return;
+        if (cancelled) return;
+        if (!state) { setNotFound(true); return; }
         setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
         setGameNameRaw(state.gameName);
-        import('@/features/game/utils/serialization').then(({ deserializePokemon }) => {
-          import('@/features/encounters/utils/serialization').then(({ deserializeEncounter }) => {
-            if (cancelled) return;
-            setPokemon((state.pokemon ?? []).map(deserializePokemon));
-            setEncounters((state.encounters ?? []).map(deserializeEncounter));
-          });
-        });
+        setPokemon((state.pokemon ?? []).map(deserializePokemon));
+        setEncounters((state.encounters ?? []).map(deserializeEncounter));
       })
       .catch((err: unknown) => console.error('[GameContext] Failed to load game:', err))
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- Imperative save / import / export ----------------------------------
   const saveNow = useCallback(async () => {
@@ -106,8 +105,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const importGame = useCallback(async (json: string) => {
     const state = await importGameFromServer(json);
-    const { deserializePokemon } = await import('@/features/game/utils/serialization');
-    const { deserializeEncounter } = await import('@/features/encounters/utils/serialization');
     setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
     setGameNameRaw(state.gameName);
     setPokemon((state.pokemon ?? []).map(deserializePokemon));
@@ -129,6 +126,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: GameContextValue = {
     loading,
+    notFound,
     guid,
     gameName,
     pokemon,

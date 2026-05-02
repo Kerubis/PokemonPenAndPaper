@@ -148,17 +148,23 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
         stopDrawing();
     };
 
-    const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-        e.preventDefault();
-        const currentIndex = BRUSH_SIZES.indexOf(brushSize);
-        if (e.deltaY < 0) {
-            // scroll up → increase size
-            if (currentIndex < BRUSH_SIZES.length - 1) setBrushSize(BRUSH_SIZES[currentIndex + 1]);
-        } else {
-            // scroll down → decrease size
-            if (currentIndex > 0) setBrushSize(BRUSH_SIZES[currentIndex - 1]);
-        }
-    };
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const handleWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const currentIndex = BRUSH_SIZES.indexOf(brushSize);
+            if (e.deltaY < 0) {
+                // scroll up → increase size
+                if (currentIndex < BRUSH_SIZES.length - 1) setBrushSize(BRUSH_SIZES[currentIndex + 1]);
+            } else {
+                // scroll down → decrease size
+                if (currentIndex > 0) setBrushSize(BRUSH_SIZES[currentIndex - 1]);
+            }
+        };
+        canvas.addEventListener('wheel', handleWheel, { passive: false });
+        return () => canvas.removeEventListener('wheel', handleWheel);
+    }, [brushSize]);
 
     const handleClear = () => {
         const canvas = canvasRef.current;
@@ -247,7 +253,6 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
                     onMouseMove={handleCanvasMouseMove}
                     onMouseUp={(e) => stopDrawing(e)}
                     onMouseLeave={handleCanvasMouseLeave}
-                    onWheel={handleWheel}
                     onContextMenu={(e) => e.preventDefault()}
                     onTouchStart={startDrawing}
                     onTouchMove={draw}

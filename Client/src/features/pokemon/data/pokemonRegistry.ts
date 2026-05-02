@@ -1,4 +1,4 @@
-import { Pokemon } from "../types/Pokemon";
+import type { Pokemon } from "../types/Pokemon";
 import { createPokemonFromJson, type PokemonSpeciesJson } from "./pokemonFactory";
 
 export interface PokemonEntry {

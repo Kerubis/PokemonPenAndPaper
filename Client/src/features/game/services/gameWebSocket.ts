@@ -9,6 +9,12 @@ type PendingRequest = {
 
 const WS_URL = (import.meta as any).env?.VITE_WS_URL ?? 'ws://localhost:3000/ws';
 
+// Exponential-backoff reconnection constants
+const RECONNECT_BASE_MS = 1_000;
+const RECONNECT_MAX_MS  = 30_000;
+let reconnectAttempt = 0;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
 let socket: WebSocket | null = null;
 let connected = false;
 const pendingRequests = new Map<string, PendingRequest>();
@@ -24,6 +30,11 @@ function getSocket(): WebSocket {
 
   socket.onopen = () => {
     connected = true;
+    reconnectAttempt = 0;
+    if (reconnectTimer !== null) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
     // Flush queued messages
     while (messageQueue.length) {
       socket!.send(messageQueue.shift()!);
@@ -64,6 +75,15 @@ function getSocket(): WebSocket {
     }
     pendingRequests.clear();
     socket = null;
+
+    // Schedule reconnection with exponential backoff
+    const delay = Math.min(RECONNECT_BASE_MS * 2 ** reconnectAttempt, RECONNECT_MAX_MS);
+    reconnectAttempt++;
+    console.warn(`[WS] Connection closed. Reconnecting in ${delay}ms (attempt ${reconnectAttempt})...`);
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      getSocket();
+    }, delay);
   };
 
   return socket;

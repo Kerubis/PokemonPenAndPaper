@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { EncounterToolbar } from '@/components/domain/EncounterToolbar';
 import { EncounterSidePanel } from '@/components/domain/EncounterSidePanel';
 import type { EncounterPropertyField } from '@/components/domain/EncounterSidePanel';
-import { Encounter } from '@/features/encounters/types/Encounter';
+import { createEncounter, setEncounterIndex, setEncounterTurnOrder } from '@/features/encounters/types/encounterOps';
 import { useTurnOrder } from '@/features/encounters';
 import type { TurnOrder } from '@/features/encounters/types/TurnOrder';
 import { useGame } from '@/contexts/GameContext';
@@ -17,8 +17,9 @@ import { sendGameUpdate, updateEncounterDrawing } from '@/features/game/services
 import { serializeEncounter } from '@/features/encounters/utils/serialization';
 
 export const EncounterPage: React.FC = () => {
-  const { guid } = useParams<{ guid?: string }>();
+  const { gameId, guid } = useParams<{ gameId: string; guid?: string }>();
   const navigate = useNavigate();
+  const base = `/${gameId}`;
   const selectedEncounterId = guid ?? null;
 
   const { guid: gameGuid, encounters, setEncounters, pokemon: allPokemon, setPokemon: setAllPokemon } = useGame();
@@ -69,18 +70,18 @@ export const EncounterPage: React.FC = () => {
   selectedEncounterIdRef.current = selectedEncounterId;
 
   // Write turn order directly into the owning encounter
-  const setEncounterTurnOrder = useCallback((updater: TurnOrder | null | ((prev: TurnOrder | null) => TurnOrder | null)) => {
+  const setEncounterTurnOrderState = useCallback((updater: TurnOrder | null | ((prev: TurnOrder | null) => TurnOrder | null)) => {
     setEncounters(prev => prev.map(e => {
       if (e.guid !== selectedEncounterIdRef.current) return e;
       const next = typeof updater === 'function' ? updater(e.turnOrder) : updater;
-      e.setTurnOrder(next);
+      const updated = setEncounterTurnOrder(e, next);
       sendGameUpdate({
         gameGuid,
         op: 'set_encounter_turn_order',
         encounterGuid: e.guid,
         turnOrder: next ?? null,
       });
-      return e;
+      return updated;
     }));
   }, [gameGuid]);
 
@@ -95,30 +96,28 @@ export const EncounterPage: React.FC = () => {
     removeEffect,
     addPokemonToTurnOrder,
     removePokemonFromTurnOrder,
-  } = useTurnOrder(setEncounterTurnOrder);
+  } = useTurnOrder(setEncounterTurnOrderState);
 
   // Navigate to first encounter if none selected
   useEffect(() => {
     if (encounters.length > 0 && !guid) {
-      navigate(`/Encounter/${encounters[0].guid}`, { replace: true });
+      navigate(`${base}/Encounter/${encounters[0].guid}`, { replace: true });
     }
   }, [encounters, guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Switch encounter – turn order is stored on the encounter itself, no explicit save/restore needed
   const handleSelectEncounter = (id: string) => {
-    navigate(`/Encounter/${id}`);
+    navigate(`${base}/Encounter/${id}`);
     setSelectedPokemon(null);
   };
 
   // Handle creating a new encounter
   const handleNewEncounter = () => {
-    const newEncounter = new Encounter({
-      name: 'New Encounter'
-    });
+    const newEncounter = createEncounter({ name: 'New Encounter' });
 
     sendGameUpdate({ gameGuid, op: 'upsert_encounter', encounter: serializeEncounter(newEncounter) });
     setEncounters(prev => [...prev, newEncounter]);
-    navigate(`/Encounter/${newEncounter.guid}`);
+    navigate(`${base}/Encounter/${newEncounter.guid}`);
   };
 
   // Handle delete encounter
@@ -131,7 +130,7 @@ export const EncounterPage: React.FC = () => {
       sendGameUpdate({ gameGuid, op: 'delete_encounter', encounterGuid: selectedEncounterId });
       setEncounters(prev => prev.filter(e => e.guid !== selectedEncounterId));
       const remaining = encounters.filter(e => e.guid !== selectedEncounterId);
-      navigate(remaining.length > 0 ? `/Encounter/${remaining[0].guid}` : '/Encounter', { replace: true });
+      navigate(remaining.length > 0 ? `${base}/Encounter/${remaining[0].guid}` : `${base}/Encounter`, { replace: true });
     }
     setShowDeleteConfirmation(null);
   };
@@ -148,12 +147,9 @@ export const EncounterPage: React.FC = () => {
       value: selectedEncounter.name,
       onChange: (value) => {
         sendGameUpdate({ gameGuid, op: 'set_encounter_name', encounterGuid: selectedEncounter.guid, name: value as string });
-        setEncounters(prev => prev.map(e => {
-          if (e.guid === selectedEncounter.guid) {
-            e.setName(value as string);
-          }
-          return e;
-        }));
+        setEncounters(prev => prev.map(e =>
+          e.guid === selectedEncounter.guid ? { ...e, name: value as string } : e
+        ));
       }
     },
     {
@@ -162,12 +158,9 @@ export const EncounterPage: React.FC = () => {
       value: selectedEncounter.finished,
       onChange: (value) => {
         sendGameUpdate({ gameGuid, op: 'set_encounter_finished', encounterGuid: selectedEncounter.guid, finished: value as boolean });
-        setEncounters(prev => prev.map(e => {
-          if (e.guid === selectedEncounter.guid) {
-            e.setFinished(value as boolean);
-          }
-          return e;
-        }));
+        setEncounters(prev => prev.map(e =>
+          e.guid === selectedEncounter.guid ? { ...e, finished: value as boolean } : e
+        ));
       }
     },
   ] : [];
@@ -187,8 +180,9 @@ export const EncounterPage: React.FC = () => {
   const handleAddPokemon = (pokemonId: string) => {
     setEncounters(prev => prev.map(e => {
       if (e.guid === selectedEncounterId) {
-        e.addPokemon(pokemonId);
-        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: e.pokemonGuids });
+        const updated = { ...e, pokemonGuids: e.pokemonGuids.includes(pokemonId) ? e.pokemonGuids : [...e.pokemonGuids, pokemonId] };
+        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: [...updated.pokemonGuids] });
+        return updated;
       }
       return e;
     }));
@@ -202,8 +196,9 @@ export const EncounterPage: React.FC = () => {
     if (!selectedPokemon || !selectedEncounterId) return;
     setEncounters(prev => prev.map(e => {
       if (e.guid === selectedEncounterId) {
-        e.removePokemon(selectedPokemon.id);
-        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: e.pokemonGuids });
+        const updated = { ...e, pokemonGuids: e.pokemonGuids.filter(g => g !== selectedPokemon.id) };
+        sendGameUpdate({ gameGuid, op: 'set_encounter_pokemon', encounterGuid: e.guid, pokemonGuids: updated.pokemonGuids });
+        return updated;
       }
       return e;
     }));
@@ -227,15 +222,12 @@ export const EncounterPage: React.FC = () => {
           onSelectEncounter={handleSelectEncounter}
           onReorder={(orderedIds) => {
             setEncounters(prev => {
-              const updated = prev.map(e => {
+              return prev.map(e => {
                 const newIndex = orderedIds.indexOf(e.guid);
-                if (newIndex !== -1) {
-                  e.setIndex(newIndex);
-                  sendGameUpdate({ gameGuid, op: 'set_encounter_index', encounterGuid: e.guid, index: newIndex });
-                }
-                return e;
+                if (newIndex === -1) return e;
+                sendGameUpdate({ gameGuid, op: 'set_encounter_index', encounterGuid: e.guid, index: newIndex });
+                return setEncounterIndex(e, newIndex);
               });
-              return [...updated];
             });
           }}
         />
@@ -247,17 +239,18 @@ export const EncounterPage: React.FC = () => {
           onDelete={selectedEncounter ? handleDeleteClick : undefined}
           availablePokemon={availablePokemonForEncounter}
           onAddPokemon={selectedEncounter ? handleAddPokemon : undefined}
-          musicLinks={selectedEncounter?.musicLinks ?? []}
+          musicLinks={[...(selectedEncounter?.musicLinks ?? [])]}
           onMusicLinksChange={selectedEncounter ? (links) => {
             sendGameUpdate({ gameGuid, op: 'set_encounter_music', encounterGuid: selectedEncounter.guid, links });
-            setEncounters(prev => prev.map(e => {
-              if (e.guid === selectedEncounter.guid) e.setMusicLinks(links);
-              return e;
-            }));
+            setEncounters(prev => prev.map(e =>
+              e.guid === selectedEncounter.guid ? { ...e, musicLinks: links } : e
+            ));
           } : undefined}
           selectedPokemon={selectedPokemon}
           onRemovePokemon={selectedPokemon ? handleRemovePokemon : undefined}
-          onDamageDealt={() => setAllPokemon(prev => [...prev])}
+          onUpdatePokemon={(pokemonId, updater) => {
+            setAllPokemon(prev => prev.map(p => p.id === pokemonId ? updater(p) : p));
+          }}
         />
 
         <div className="encounter-page-main" ref={mainRef}>
@@ -267,12 +260,9 @@ export const EncounterPage: React.FC = () => {
                 encounter={selectedEncounter}
                 onStoryChange={(story) => {
                   sendGameUpdate({ gameGuid, op: 'set_encounter_story', encounterGuid: selectedEncounterId!, story });
-                  setEncounters(prev => prev.map(e => {
-                    if (e.guid === selectedEncounterId) {
-                      e.setStory(story);
-                    }
-                    return e;
-                  }));
+                  setEncounters(prev => prev.map(e =>
+                    e.guid === selectedEncounterId ? { ...e, story } : e
+                  ));
                 }}
               />
               <DrawingTool
@@ -280,12 +270,9 @@ export const EncounterPage: React.FC = () => {
                 initialDrawing={selectedEncounter.mapDrawing}
                 onDrawingChange={(dataUrl) => {
                   updateEncounterDrawing(selectedEncounterId!, dataUrl);
-                  setEncounters(prev => prev.map(e => {
-                    if (e.guid === selectedEncounterId) {
-                      e.setMapDrawing(dataUrl);
-                    }
-                    return e;
-                  }));
+                  setEncounters(prev => prev.map(e =>
+                    e.guid === selectedEncounterId ? { ...e, mapDrawing: dataUrl } : e
+                  ));
                 }}
               />
               <div

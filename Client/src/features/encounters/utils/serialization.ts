@@ -1,4 +1,5 @@
-import { Encounter } from '../types/Encounter';
+import type { Encounter } from '../types/Encounter';
+import { createEncounter } from '../types/encounterOps';
 import type { SerializedEncounter } from '../../game/types/GameState';
 import type { TurnOrder } from '../types/TurnOrder';
 
@@ -28,7 +29,7 @@ export function deserializeEncounter(data: SerializedEncounter): Encounter {
     if (musicLinks.length === 0 && data.musicLink) {
         musicLinks = [{ url: data.musicLink, description: 'Battle Music' }];
     }
-    return new Encounter({
+    return createEncounter({
         guid: data.guid,
         name: data.name,
         musicLinks,

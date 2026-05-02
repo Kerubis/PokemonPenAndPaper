@@ -1,4 +1,5 @@
-import { Pokemon } from "../types/Pokemon";
+import type { Pokemon } from "../types/Pokemon";
+import { createPokemon, registerAbilityUnlock } from "../types/pokemonOps";
 import { PokemonType } from "../types/Type";
 import { Abilities } from "../../abilities";
 
@@ -43,21 +44,21 @@ export function createPokemonFromJson(data: PokemonSpeciesJson, overrides: Recor
   const type1 = resolveType(data.type1);
   const type2 = data.type2 ? resolveType(data.type2) : null;
 
-  const pokemon = new Pokemon(
+  let pokemon = createPokemon(
     data.pokedexEntry,
     data.pokemonName,
     type1,
     type2,
-    { flaw: data.flaw, strength: data.strength, ...overrides }
+    { flaw: data.flaw, strength: data.strength, ...overrides } as Parameters<typeof createPokemon>[4],
   );
 
-  data.abilityUnlocks.forEach(({ ability, level }) => {
-    const resolvedAbility = Abilities[ability];
+  for (const { ability: abilityKey, level } of data.abilityUnlocks) {
+    const resolvedAbility = Abilities[abilityKey];
     if (!resolvedAbility) {
-      throw new Error(`Unknown ability: "${ability}". Check that it matches an Abilities key (spaces removed, e.g. "TailWhip").`);
+      throw new Error(`Unknown ability: "${abilityKey}". Check that it matches an Abilities key (spaces removed, e.g. "TailWhip").`);
     }
-    pokemon.registerAbilityUnlock(resolvedAbility, level);
-  });
+    pokemon = registerAbilityUnlock(pokemon, resolvedAbility, level);
+  }
 
   return pokemon;
 }

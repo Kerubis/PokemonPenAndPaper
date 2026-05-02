@@ -12,13 +12,36 @@ import type {
 } from '../types/GameState';
 import type { GameUpdatePayload } from '../ws/wsTypes';
 
-// ---- Load ----------------------------------------------------------------
+// ---- List ----------------------------------------------------------------
 
-export async function loadGame(): Promise<GameState | null> {
+export interface GameSummary {
+  guid: string;
+  gameName: string;
+  updatedAt: string;
+}
+
+export async function listGames(): Promise<GameSummary[]> {
   const conn = await pool.getConnection();
   try {
-    // There is only one game per server instance (single-campaign app).
-    const [games] = await conn.execute<any[]>('SELECT * FROM games LIMIT 1');
+    const [rows] = await conn.execute<any[]>('SELECT guid, game_name, updated_at FROM games ORDER BY updated_at DESC');
+    return rows.map(r => ({
+      guid: r.guid,
+      gameName: r.game_name,
+      updatedAt: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+    }));
+  } finally {
+    conn.release();
+  }
+}
+
+// ---- Load ----------------------------------------------------------------
+
+export async function loadGame(gameId?: string): Promise<GameState | null> {
+  const conn = await pool.getConnection();
+  try {
+    const [games] = gameId
+      ? await conn.execute<any[]>('SELECT * FROM games WHERE guid = ? LIMIT 1', [gameId])
+      : await conn.execute<any[]>('SELECT * FROM games LIMIT 1');
     if (!games.length) return null;
     const game = games[0];
 

@@ -5,6 +5,7 @@ import { WalkIcon, WaveIcon, WingIcon, MountainIcon } from '@/components/ui/icon
 import { formatPokedexNumber } from '@/lib/utils';
 import { calculateDefensiveEffectiveness } from '@/features/pokemon/utils/typeEffectiveness';
 import type { Pokemon, PokemonType } from '@/features/pokemon/types';
+import { getMaxHp, getAbilitiesAvailable } from '@/features/pokemon/types/pokemonOps';
 import './CharacterSheet.css';
 
 interface CharacterSheetProps {
@@ -115,7 +116,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           <BorderBox label="HP:" className="charcter-sheet-box-stat-hp">
             <div className="charcter-sheet-stat-row">
               <div className="charcter-sheet-stat-blocks">
-                {renderStatBlocks(pokemon.maxHp, 10)}
+                {renderStatBlocks(getMaxHp(pokemon), 10)}
               </div>
             </div>
           </BorderBox>
@@ -193,8 +194,8 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
         </BorderBox>
         <BorderBox label="Abilities:" className="charcter-sheet-box-abilities">
           <div className="charcter-sheet-abilities-text">
-            {pokemon.abilitiesAvailable.map((ability, index) => (
-              <span key={index}>{ability.name}{index < pokemon.abilitiesAvailable.length - 1 ? ', ' : ''}</span>
+            {getAbilitiesAvailable(pokemon).map((ability, index, arr) => (
+              <span key={index}>{ability.name}{index < arr.length - 1 ? ', ' : ''}</span>
             ))}
           </div>
         </BorderBox>

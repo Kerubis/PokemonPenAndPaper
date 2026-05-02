@@ -1,5 +1,5 @@
 import type WebSocket from 'ws';
-import { loadGame, saveGame, updateEncounterDrawing, applyGameUpdate } from '../services/gameService';
+import { listGames, loadGame, saveGame, updateEncounterDrawing, applyGameUpdate } from '../services/gameService';
 import type { WsMessage, GameUpdatePayload } from './wsTypes';
 import type { GameState } from '../types/GameState';
 
@@ -29,9 +29,21 @@ export async function handleMessage(ws: WebSocket, raw: string) {
       send(ws, { id, type: 'PONG' });
       break;
 
+    case 'LIST_GAMES': {
+      try {
+        const games = await listGames();
+        send(ws, { id, type: 'GAMES_LISTED', payload: games });
+      } catch (err: any) {
+        console.error('LIST_GAMES error:', err);
+        sendError(ws, id, err?.message ?? 'Failed to list games');
+      }
+      break;
+    }
+
     case 'LOAD_GAME': {
       try {
-        const game = await loadGame();
+        const gameId = (payload as { gameId?: string } | undefined)?.gameId;
+        const game = await loadGame(gameId);
         send(ws, { id, type: 'GAME_LOADED', payload: game });
       } catch (err: any) {
         console.error('LOAD_GAME error:', err);

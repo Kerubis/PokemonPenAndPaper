@@ -3,19 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CharacterToolbar } from '@/components/domain/CharacterToolbar';
 import { CharacterList } from '@/components/domain/CharacterList';
 import { CharacterPropertiesPanel } from '@/components/domain/CharacterPropertiesPanel';
-import type { PropertyField } from '@/components/domain/CharacterPropertiesPanel';
 import { CharacterSheet } from '@/components/domain/CharacterSheet';
 import { CharacterCard } from '@/components/domain/CharacterCard';
 import { createPokemonById } from '@/features/pokemon/data/pokemonRegistry';
+import { setIndex } from '@/features/pokemon/types/pokemonOps';
 import { useGame } from '@/contexts/GameContext';
 import { ConfirmPopover } from '@/components/ui/ConfirmPopover';
 import { sendGameUpdate } from '@/features/game/services/gameApi';
 import { serializePokemon } from '@/features/game/utils/serialization';
+import { useCharacterPropertyFields } from '@/features/characters/hooks/useCharacterPropertyFields';
+import { getMaxHp } from '@/features/pokemon/types/pokemonOps';
 import './CharactersPage.css';
 
 export const CharactersPage: React.FC = () => {
-  const { guid } = useParams<{ guid?: string }>();
+  const { gameId, guid } = useParams<{ gameId: string; guid?: string }>();
   const navigate = useNavigate();
+  const base = `/${gameId}`;
   const selectedCharacterId = guid ?? null;
 
   const { pokemon: characters, setPokemon: setCharacters, guid: gameGuid } = useGame();
@@ -24,7 +27,7 @@ export const CharactersPage: React.FC = () => {
   // Navigate to first character if none selected
   useEffect(() => {
     if (characters.length > 0 && !guid) {
-      navigate(`/Characters/${characters[0].id}`, { replace: true });
+      navigate(`${base}/Characters/${characters[0].id}`, { replace: true });
     }
   }, [characters, guid]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -50,7 +53,7 @@ export const CharactersPage: React.FC = () => {
     if (newPokemon) {
       sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(newPokemon) });
       setCharacters(prev => [...prev, newPokemon]);
-      navigate(`/Characters/${newPokemon.id}`);
+      navigate(`${base}/Characters/${newPokemon.id}`);
     }
   };
 
@@ -61,19 +64,18 @@ export const CharactersPage: React.FC = () => {
 
   // Handle character selection
   const handleSelectCharacter = (id: string) => {
-    navigate(`/Characters/${id}`);
+    navigate(`${base}/Characters/${id}`);
   };
 
   // Handle reordering characters via DnD
   const handleReorderCharacters = (orderedIds: string[]) => {
     setCharacters(prev => {
-      const updated = [...prev];
-      orderedIds.forEach((id, idx) => {
-        const char = updated.find(c => c.id === id);
-        if (char) {
-          char.setIndex(idx);
-          sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(char) });
-        }
+      const updated = prev.map(c => {
+        const newIdx = orderedIds.indexOf(c.id);
+        if (newIdx === -1) return c;
+        const reindexed = setIndex(c, newIdx);
+        sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(reindexed) });
+        return reindexed;
       });
       return updated.sort((a, b) => a.index - b.index);
     });
@@ -91,7 +93,7 @@ export const CharactersPage: React.FC = () => {
       setCharacters(prev => prev.filter(c => c.id !== showDeleteConfirmation.id));
       if (selectedCharacterId === showDeleteConfirmation.id) {
         const remaining = characters.filter(c => c.id !== showDeleteConfirmation.id);
-        navigate(remaining.length > 0 ? `/Characters/${remaining[0].id}` : '/Characters', { replace: true });
+        navigate(remaining.length > 0 ? `${base}/Characters/${remaining[0].id}` : `${base}/Characters`, { replace: true });
       }
       setShowDeleteConfirmation(null);
     }
@@ -101,305 +103,7 @@ export const CharactersPage: React.FC = () => {
     setShowDeleteConfirmation(null);
   };
 
-  // Build property fields for the selected character
-  const propertyFields: PropertyField[] = selectedCharacter ? [
-    {
-      label: 'Name',
-      type: 'text',
-      value: selectedCharacter.name,
-      onChange: (value) => {
-        setCharacters(prev => prev.map(c =>
-          c.id === selectedCharacter.id
-            ? (() => {
-                const updated = createPokemonById(c.pokedexEntry, {
-                  id: c.id,
-                  name: value as string,
-                  level: c.level,
-                  hp: c.hp,
-                  currentHp: c.currentHp,
-                  attack: c.attack,
-                  specialAttack: c.specialAttack,
-                  defense: c.defense,
-                  specialDefense: c.specialDefense,
-                  speed: c.speed,
-                  flaw: c.flaw,
-                  strength: c.strength,
-                  abilities: c.abilities,
-                  isPlayerCharacter: c.isPlayerCharacter,
-                  index: c.index
-                }) ?? c;
-                if (updated !== c) sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) });
-                return updated;
-              })()
-            : c
-        ));
-      }
-    },
-    {
-      label: 'Level',
-      type: 'number',
-      value: selectedCharacter.level,
-      onChange: (value) => {
-        const level = parseInt(value as string, 10) || 1;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setLevel(level); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 1, max: 100 }
-    },
-    {
-      label: 'HP',
-      type: 'number',
-      value: selectedCharacter.hp,
-      onChange: (value) => {
-        const hp = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setHp(hp); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Attack',
-      type: 'number',
-      value: selectedCharacter.attack,
-      onChange: (value) => {
-        const attack = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setAttack(attack); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Special Attack',
-      type: 'number',
-      value: selectedCharacter.specialAttack,
-      onChange: (value) => {
-        const specialAttack = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setSpecialAttack(specialAttack); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Defense',
-      type: 'number',
-      value: selectedCharacter.defense,
-      onChange: (value) => {
-        const defense = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setDefense(defense); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Special Defense',
-      type: 'number',
-      value: selectedCharacter.specialDefense,
-      onChange: (value) => {
-        const specialDefense = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setSpecialDefense(specialDefense); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Speed',
-      type: 'number',
-      value: selectedCharacter.speed,
-      onChange: (value) => {
-        const speed = parseInt(value as string, 10) || 0;
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setSpeed(speed); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-    {
-      label: 'Is Player Character',
-      type: 'checkbox',
-      value: selectedCharacter.isPlayerCharacter,
-      onChange: (value) => {
-        const isPlayerCharacter = Boolean(value);
-        setCharacters(prev => prev.map(c => {
-          if (c.id === selectedCharacter.id) {
-            const updated = createPokemonById(c.pokedexEntry, {
-              id: c.id,
-              name: c.name,
-              level: c.level,
-              hp: c.hp,
-              currentHp: c.currentHp,
-              attack: c.attack,
-              specialAttack: c.specialAttack,
-              defense: c.defense,
-              specialDefense: c.specialDefense,
-              speed: c.speed,
-              flaw: c.flaw,
-              strength: c.strength,
-              abilities: c.abilities,
-              isPlayerCharacter: c.isPlayerCharacter,
-              index: c.index
-            });
-            if (updated) { updated.setIsPlayerCharacter(isPlayerCharacter); sendGameUpdate({ gameGuid, op: 'upsert_pokemon', pokemon: serializePokemon(updated) }); }
-            return updated ?? c;
-          }
-          return c;
-        }));
-      },
-      options: { min: 0, max: 250 }
-    },
-  ] : [];
+  const propertyFields = useCharacterPropertyFields(selectedCharacter, setCharacters, gameGuid);
 
   // Build character list items (sorted by index)
   const characterListItems = [...characters]
@@ -414,7 +118,7 @@ export const CharactersPage: React.FC = () => {
         type1={character.type1}
         type2={character.type2 || undefined}
         currentHp={character.currentHp}
-        maxHp={character.maxHp}
+        maxHp={getMaxHp(character)}
         isActive={character.id === selectedCharacterId}
       />
     )

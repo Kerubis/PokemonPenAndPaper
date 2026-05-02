@@ -32,21 +32,34 @@ export type GameUpdatePayload =
   | { gameGuid: string; op: 'upsert_pokemon';           pokemon: SerializedPokemon }
   | { gameGuid: string; op: 'delete_pokemon';           pokemonId: string };
 
+// ---- List ----------------------------------------------------------------
+
+export interface GameSummary {
+  guid: string;
+  gameName: string;
+  updatedAt: string;
+}
+
+export async function listGamesFromServer(): Promise<GameSummary[]> {
+  const res = await sendMessage<undefined, GameSummary[]>('LIST_GAMES');
+  return res.payload ?? [];
+}
+
 // ---- Load ----------------------------------------------------------------
 
-export async function loadGameFromServer(): Promise<GameState | null> {
-  const res = await sendMessage<undefined, GameState | null>('LOAD_GAME');
+export async function loadGameFromServer(gameId?: string): Promise<GameState | null> {
+  const res = await sendMessage<{ gameId?: string } | undefined, GameState | null>('LOAD_GAME', gameId ? { gameId } : undefined);
   return res.payload ?? null;
 }
 
-export async function loadPokemonFromServer(): Promise<Pokemon[]> {
-  const gameState = await loadGameFromServer();
+export async function loadPokemonFromServer(gameId?: string): Promise<Pokemon[]> {
+  const gameState = await loadGameFromServer(gameId);
   if (!gameState) return [];
   return gameState.pokemon.map(deserializePokemon);
 }
 
-export async function loadEncountersFromServer(): Promise<Encounter[]> {
-  const gameState = await loadGameFromServer();
+export async function loadEncountersFromServer(gameId?: string): Promise<Encounter[]> {
+  const gameState = await loadGameFromServer(gameId);
   if (!gameState) return [];
   return (gameState.encounters ?? []).map(deserializeEncounter);
 }

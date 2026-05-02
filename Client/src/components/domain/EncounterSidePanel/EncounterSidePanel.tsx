@@ -10,6 +10,7 @@ import type { MusicLink } from '@/features/encounters/types/Encounter';
 import type { Pokemon } from '@/features/pokemon/types';
 import { PokemonType } from '@/features/pokemon/types/Type';
 import type { DamageType } from '@/features/pokemon/types/DamageType';
+import { dealDirectDamage, heal } from '@/features/pokemon/types/pokemonOps';
 import { useMusicContext } from '@/contexts/MusicContext';
 import './EncounterSidePanel.css';
 
@@ -32,10 +33,10 @@ interface EncounterSidePanelProps {
   onMusicLinksChange?: (links: MusicLink[]) => void;
   selectedPokemon?: Pokemon | null;
   onRemovePokemon?: () => void;
-  onDamageDealt?: () => void;
+  onUpdatePokemon?: (pokemonId: string, updater: (p: Pokemon) => Pokemon) => void;
 }
 
-export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange, selectedPokemon, onRemovePokemon, onDamageDealt }) => {
+export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange, selectedPokemon, onRemovePokemon, onUpdatePokemon }) => {
   const { currentLink, setCurrentLink } = useMusicContext();
   const [newUrl, setNewUrl] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -50,19 +51,17 @@ export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, 
   const [healAmount, setHealAmount] = useState<number>(0);
 
   const handleDealDamage = () => {
-    if (!selectedPokemon || damageAmount <= 0) return;
+    if (!selectedPokemon || damageAmount <= 0 || !onUpdatePokemon) return;
     const type = (PokemonType as unknown as Record<string, PokemonType>)[attackingType];
     if (!type) return;
-    selectedPokemon.dealDirectDamage(type, damageType, damageAmount);
+    onUpdatePokemon(selectedPokemon.id, p => dealDirectDamage(p, type, damageType, damageAmount));
     setDamageAmount(0);
-    onDamageDealt?.();
   };
 
   const handleHeal = () => {
-    if (!selectedPokemon || healAmount <= 0) return;
-    selectedPokemon.heal(healAmount);
+    if (!selectedPokemon || healAmount <= 0 || !onUpdatePokemon) return;
+    onUpdatePokemon(selectedPokemon.id, p => heal(p, healAmount));
     setHealAmount(0);
-    onDamageDealt?.();
   };
 
   useEffect(() => {

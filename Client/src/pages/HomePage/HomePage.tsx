@@ -1,11 +1,13 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import { formatPokedexNumber } from '@/lib/utils';
 import './HomePage.css';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { gameId } = useParams<{ gameId: string }>();
+  const base = `/${gameId}`;
   const { gameName, setGameName, pokemon, encounters, importGame, exportGame } = useGame();
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState<string>(gameName);
@@ -64,6 +66,7 @@ export const HomePage: React.FC = () => {
           <button className="home-page-action-btn" onClick={handleExport}>Export JSON</button>
           <button className="home-page-action-btn" onClick={() => importInputRef.current?.click()}>Import JSON</button>
           <input ref={importInputRef} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={handleImportFile} />
+          <button className="home-page-action-btn home-page-action-btn--exit" onClick={() => navigate('/')}>Exit Game</button>
         </div>
       </div>
 
@@ -81,7 +84,7 @@ export const HomePage: React.FC = () => {
             <li
               key={p.id}
               className="home-page-list-item"
-              onClick={() => navigate(`/Characters/${p.id}`)}
+              onClick={() => navigate(`${base}/Characters/${p.id}`)}
             >
               <span className="home-page-list-item-sub">{formatPokedexNumber(p.pokedexEntry)} {p.pokemonName}</span>
               <span className="home-page-list-item-name">{p.name || <em>Unnamed</em>}</span>
@@ -104,7 +107,7 @@ export const HomePage: React.FC = () => {
             <li
               key={e.guid}
               className="home-page-list-item"
-              onClick={() => navigate(`/Encounter/${e.guid}`)}
+              onClick={() => navigate(`${base}/Encounter/${e.guid}`)}
             >
               <span className="home-page-list-item-name">{e.name || <em>Unnamed</em>}</span>
             </li>
