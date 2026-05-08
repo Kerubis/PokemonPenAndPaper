@@ -251,6 +251,14 @@ export const EncounterPage: React.FC = () => {
           onUpdatePokemon={(pokemonId, updater) => {
             setAllPokemon(prev => prev.map(p => p.id === pokemonId ? updater(p) : p));
           }}
+          mapWidth={selectedEncounter?.mapWidth}
+          mapHeight={selectedEncounter?.mapHeight}
+          onMapSizeChange={selectedEncounter ? (mapWidth, mapHeight) => {
+            sendGameUpdate({ gameGuid, op: 'set_encounter_map_size', encounterGuid: selectedEncounter.guid, mapWidth, mapHeight });
+            setEncounters(prev => prev.map(e =>
+              e.guid === selectedEncounter.guid ? { ...e, mapWidth, mapHeight } : e
+            ));
+          } : undefined}
         />
 
         <div className="encounter-page-main" ref={mainRef}>
@@ -268,6 +276,8 @@ export const EncounterPage: React.FC = () => {
               <DrawingTool
                 key={selectedEncounter.guid}
                 initialDrawing={selectedEncounter.mapDrawing}
+                width={selectedEncounter.mapWidth}
+                height={selectedEncounter.mapHeight}
                 onDrawingChange={(dataUrl) => {
                   updateEncounterDrawing(selectedEncounterId!, dataUrl);
                   setEncounters(prev => prev.map(e =>

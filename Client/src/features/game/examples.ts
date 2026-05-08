@@ -7,10 +7,11 @@
 
 import { loadGameFromServer, saveGameToServer, exportGameAsJson } from './index';
 import { createPokemonById } from '../pokemon/data/pokemonRegistry';
+import { generateUUID } from '../../lib/utils/uuid';
 
 // Example: Create a new game with Pokemon
 export async function createNewGame() {
-  const gameGuid = crypto.randomUUID();
+  const gameGuid = generateUUID();
   const gameName = "My Pokemon Adventure";
 
   // Create some Pokemon instances

@@ -171,6 +171,8 @@ async function loadEncounters(conn: PoolConnection, gameGuid: string): Promise<S
       index: row.idx,
       finished: Boolean(row.finished),
       mapDrawing: row.map_drawing ?? '',
+      mapWidth: row.map_width ?? 800,
+      mapHeight: row.map_height ?? 600,
       turnOrder,
     });
   }
@@ -229,9 +231,9 @@ export async function saveGame(state: GameState): Promise<GameState> {
     await conn.execute('DELETE FROM encounters WHERE game_guid = ?', [state.guid]);
     for (const e of state.encounters) {
       await conn.execute(
-        `INSERT INTO encounters (guid, game_guid, name, story, idx, finished, map_drawing)
-         VALUES (?,?,?,?,?,?,?)`,
-        [e.guid, state.guid, e.name, e.story ?? '', e.index, e.finished, e.mapDrawing ?? ''],
+        `INSERT INTO encounters (guid, game_guid, name, story, idx, finished, map_drawing, map_width, map_height)
+         VALUES (?,?,?,?,?,?,?,?,?)`,
+        [e.guid, state.guid, e.name, e.story ?? '', e.index, e.finished, e.mapDrawing ?? '', e.mapWidth ?? 800, e.mapHeight ?? 600],
       );
 
       for (const ml of (e.musicLinks ?? [])) {
@@ -323,12 +325,13 @@ export async function applyGameUpdate(payload: GameUpdatePayload): Promise<void>
       case 'upsert_encounter': {
         const e = payload.encounter;
         await conn.execute(
-          `INSERT INTO encounters (guid, game_guid, name, story, idx, finished, map_drawing)
-           VALUES (?,?,?,?,?,?,?)
+          `INSERT INTO encounters (guid, game_guid, name, story, idx, finished, map_drawing, map_width, map_height)
+           VALUES (?,?,?,?,?,?,?,?,?)
            ON DUPLICATE KEY UPDATE
              name = VALUES(name), story = VALUES(story), idx = VALUES(idx),
-             finished = VALUES(finished), map_drawing = VALUES(map_drawing)`,
-          [e.guid, gameGuid, e.name, e.story ?? '', e.index, e.finished, e.mapDrawing ?? ''],
+             finished = VALUES(finished), map_drawing = VALUES(map_drawing),
+             map_width = VALUES(map_width), map_height = VALUES(map_height)`,
+          [e.guid, gameGuid, e.name, e.story ?? '', e.index, e.finished, e.mapDrawing ?? '', e.mapWidth ?? 800, e.mapHeight ?? 600],
         );
         await conn.execute('DELETE FROM encounter_music_links WHERE encounter_guid = ?', [e.guid]);
         for (const ml of (e.musicLinks ?? [])) {
@@ -409,6 +412,13 @@ export async function applyGameUpdate(payload: GameUpdatePayload): Promise<void>
         }
         break;
       }
+
+      case 'set_encounter_map_size':
+        await conn.execute(
+          'UPDATE encounters SET map_width = ?, map_height = ? WHERE guid = ? AND game_guid = ?',
+          [payload.mapWidth, payload.mapHeight, payload.encounterGuid, gameGuid],
+        );
+        break;
 
       case 'set_encounter_turn_order': {
         await conn.execute(

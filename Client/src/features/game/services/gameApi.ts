@@ -29,6 +29,7 @@ export type GameUpdatePayload =
   | { gameGuid: string; op: 'set_encounter_music';      encounterGuid: string; links: SerializedMusicLink[] }
   | { gameGuid: string; op: 'set_encounter_pokemon';    encounterGuid: string; pokemonGuids: string[] }
   | { gameGuid: string; op: 'set_encounter_turn_order'; encounterGuid: string; turnOrder: SerializedTurnOrder | null }
+  | { gameGuid: string; op: 'set_encounter_map_size';   encounterGuid: string; mapWidth: number; mapHeight: number }
   | { gameGuid: string; op: 'upsert_pokemon';           pokemon: SerializedPokemon }
   | { gameGuid: string; op: 'delete_pokemon';           pokemonId: string };
 

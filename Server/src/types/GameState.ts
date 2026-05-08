@@ -66,6 +66,8 @@ export interface SerializedEncounter {
   index: number;
   finished: boolean;
   mapDrawing?: string;
+  mapWidth?: number;
+  mapHeight?: number;
   turnOrder?: SerializedTurnOrder;
 }
 

@@ -14,5 +14,7 @@ export interface Encounter {
     readonly index: number;
     readonly finished: boolean;
     readonly mapDrawing: string;
+    readonly mapWidth: number;
+    readonly mapHeight: number;
     readonly turnOrder: TurnOrder | null;
 }

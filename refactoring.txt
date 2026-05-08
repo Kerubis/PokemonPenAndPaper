@@ -1,0 +1,28 @@
+2. GameContext leaks raw setPokemon / setEncounters
+The context exposes raw React dispatch setters. Any consumer can mutate state without going through the server sync layer. Higher-level methods (addPokemon, deletePokemon, updatePokemon, etc.) should be exposed instead, with the server sendGameUpdate call encapsulated inside them. This would also remove the need for every page to import sendGameUpdate and serializePokemon.
+
+3. Inline property field config in EncounterPage
+sidePanelFields is built inline in the component body (no useMemo) and mixes UI config with business logic. This mirrors what useCharacterPropertyFields solved for characters — extract it to a useEncounterPropertyFields hook.
+
+Medium Priority
+4. Repetitive stat field definitions in useCharacterPropertyFields
+The six stat fields (hp, attack, specialAttack, defense, specialDefense, speed) are structurally identical. They can be generated from a config array:
+
+5. Inline drag logic in EncounterPage
+The floating TurnOrderPanel drag implementation (~25 lines with mousedown/mousemove/mouseup listeners) is embedded in the page. Extract to a useDraggable hook.
+
+6. loadPokemonFromServer / loadEncountersFromServer are dead weight
+gameApi.ts exports two functions that load a full GameState just to extract one slice — and GameContext doesn't use them. They duplicate what the context already does. Remove or consolidate them.
+
+7. Inline onReorder callback in EncounterPage JSX
+The encounter reorder callback is defined directly in JSX props. It should be extracted to a named handleReorderEncounters handler for consistency and readability.
+
+Low Priority
+8. gameWebSocket.ts module-level mutable state
+The singleton is implemented with bare module-level variables (socket, pendingRequests, messageQueue, etc.). A class would make this easier to test and reason about. The (import.meta as any).env cast should use import.meta.env.VITE_WS_URL with a proper Vite env type declaration instead.
+
+9. Pokemon._abilityUnlocks is never serialized
+registerAbilityUnlock populates _abilityUnlocks but the serialization layer in serialization.ts doesn't persist it, so ability unlock data is lost across sessions.
+
+10. "Character" vs "Pokemon" semantic ambiguity
+The characters feature (features/characters/) is nearly empty — just one hook — and Pokemon is used directly as the character concept throughout. Either own the Pokemon class as a character (rename), or create a proper Character wrapper type so the domain language is consistent.

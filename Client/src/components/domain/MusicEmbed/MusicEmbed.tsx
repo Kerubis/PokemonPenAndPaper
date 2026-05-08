@@ -59,6 +59,13 @@ export const MusicEmbed: React.FC<MusicEmbedProps> = ({ musicLinks = [] }) => {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
         if (data?.event === 'onStateChange') {
           setIsPlaying(data.info === 1);
+          // Restart when video ends (state 0)
+          if (data.info === 0) {
+            iframeRef.current?.contentWindow?.postMessage(
+              JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+              'https://www.youtube.com'
+            );
+          }
         } else if (data?.event === 'infoDelivery' && data?.info?.playerState !== undefined) {
           setIsPlaying(data.info.playerState === 1);
         }

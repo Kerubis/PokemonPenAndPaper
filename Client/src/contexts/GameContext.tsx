@@ -18,6 +18,7 @@ import {
 } from '@/features/game/services/gameApi';
 import { serializePokemon, deserializePokemon } from '@/features/game/utils/serialization';
 import { serializeEncounter, deserializeEncounter } from '@/features/encounters/utils/serialization';
+import { generateUUID } from '@/lib/utils/uuid';
 
 // ---- Types ----------------------------------------------------------------
 
@@ -58,7 +59,7 @@ export function useGame(): GameContextValue {
 export const GameProvider: React.FC<{ children: React.ReactNode; gameId?: string }> = ({ children, gameId }) => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [guid, setGuid] = useState(() => crypto.randomUUID());
+  const [guid, setGuid] = useState(() => generateUUID());
   const [gameName, setGameNameRaw] = useState('My Pokemon Game');
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [encounters, setEncounters] = useState<Encounter[]>([]);
@@ -85,7 +86,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode; gameId?: string
       .then((state: GameState | null) => {
         if (cancelled) return;
         if (!state) { setNotFound(true); return; }
-        setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
+        setGuid(state.guid as string);
         setGameNameRaw(state.gameName);
         setPokemon((state.pokemon ?? []).map(deserializePokemon));
         setEncounters((state.encounters ?? []).map(deserializeEncounter));
@@ -105,7 +106,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode; gameId?: string
 
   const importGame = useCallback(async (json: string) => {
     const state = await importGameFromServer(json);
-    setGuid(state.guid as ReturnType<typeof crypto.randomUUID>);
+    setGuid(state.guid as string);
     setGameNameRaw(state.gameName);
     setPokemon((state.pokemon ?? []).map(deserializePokemon));
     setEncounters((state.encounters ?? []).map(deserializeEncounter));

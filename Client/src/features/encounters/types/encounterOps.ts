@@ -7,6 +7,7 @@
 
 import type { Encounter, MusicLink } from "./Encounter";
 import type { TurnOrder } from "./TurnOrder";
+import { generateUUID } from "../../../lib/utils/uuid";
 
 // ---------------------------------------------------------------------------
 // Factory
@@ -21,12 +22,14 @@ export interface EncounterCreateOptions {
     index?: number;
     finished?: boolean;
     mapDrawing?: string;
+    mapWidth?: number;
+    mapHeight?: number;
     turnOrder?: TurnOrder | null;
 }
 
 export function createEncounter(opts: EncounterCreateOptions = {}): Encounter {
     return {
-        guid: opts.guid ?? crypto.randomUUID(),
+        guid: opts.guid ?? generateUUID(),
         name: opts.name ?? "",
         musicLinks: opts.musicLinks ?? [],
         pokemonGuids: opts.pokemonGuids ?? [],
@@ -34,6 +37,8 @@ export function createEncounter(opts: EncounterCreateOptions = {}): Encounter {
         index: opts.index ?? 0,
         finished: opts.finished ?? false,
         mapDrawing: opts.mapDrawing ?? "",
+        mapWidth: opts.mapWidth ?? 800,
+        mapHeight: opts.mapHeight ?? 600,
         turnOrder: opts.turnOrder ?? null,
     };
 }
@@ -56,6 +61,10 @@ export function setEncounterStory(e: Encounter, story: string): Encounter {
 
 export function setEncounterIndex(e: Encounter, index: number): Encounter {
     return { ...e, index };
+}
+
+export function setEncounterMapSize(e: Encounter, mapWidth: number, mapHeight: number): Encounter {
+    return { ...e, mapWidth, mapHeight };
 }
 
 export function setEncounterMapDrawing(e: Encounter, mapDrawing: string): Encounter {

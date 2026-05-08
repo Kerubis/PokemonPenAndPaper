@@ -5,6 +5,8 @@ import './DrawingTool.css';
 interface DrawingToolProps {
     initialDrawing?: string;
     onDrawingChange?: (dataUrl: string) => void;
+    width?: number;
+    height?: number;
 }
 
 const PALETTE_COLORS = [
@@ -24,7 +26,7 @@ const PALETTE_COLORS = [
 
 const BRUSH_SIZES = [1, 2, 5, 10, 20];
 
-export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDrawingChange }) => {
+export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDrawingChange, width = 1000, height = 1000 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawing = useRef(false);
     const lastPos = useRef<{ x: number; y: number } | null>(null);
@@ -37,6 +39,9 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
     const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
     const [clearAnchor, setClearAnchor] = useState<{ x: number; y: number } | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const isPanning = useRef(false);
+    const panStart = useRef<{ mouseX: number; mouseY: number; scrollLeft: number; scrollTop: number } | null>(null);
 
     // Scale canvas to devicePixelRatio for crisp rendering, then draw initial image
     useEffect(() => {
@@ -78,23 +83,23 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        // ctx is already scaled by dpr (see init effect), so return plain CSS offsets.
         if ('touches' in e) {
             const touch = e.touches[0];
             return {
-                x: (touch.clientX - rect.left) * scaleX,
-                y: (touch.clientY - rect.top) * scaleY,
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top,
             };
         }
         return {
-            x: (e.clientX - rect.left) * scaleX,
-            y: (e.clientY - rect.top) * scaleY,
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
         };
     };
 
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         e.preventDefault();
+        if ('button' in e && e.button === 1) return; // middle mouse handled separately
         if ('button' in e && e.button === 2) {
             prevEraser.current = eraser;
             setEraser(true);
@@ -147,6 +152,46 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
         if (isDrawing.current) setEraser(prevEraser.current);
         stopDrawing();
     };
+
+    // Middle-mouse pan
+    useEffect(() => {
+        const scrollArea = scrollAreaRef.current;
+        if (!scrollArea) return;
+
+        const onMouseDown = (e: MouseEvent) => {
+            if (e.button !== 1) return;
+            e.preventDefault();
+            isPanning.current = true;
+            panStart.current = {
+                mouseX: e.clientX,
+                mouseY: e.clientY,
+                scrollLeft: scrollArea.scrollLeft,
+                scrollTop: scrollArea.scrollTop,
+            };
+            scrollArea.style.cursor = 'grabbing';
+        };
+        const onMouseMove = (e: MouseEvent) => {
+            if (!isPanning.current || !panStart.current) return;
+            e.preventDefault();
+            scrollArea.scrollLeft = panStart.current.scrollLeft - (e.clientX - panStart.current.mouseX);
+            scrollArea.scrollTop  = panStart.current.scrollTop  - (e.clientY - panStart.current.mouseY);
+        };
+        const onMouseUp = (e: MouseEvent) => {
+            if (e.button !== 1 || !isPanning.current) return;
+            isPanning.current = false;
+            panStart.current = null;
+            scrollArea.style.cursor = '';
+        };
+
+        scrollArea.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        return () => {
+            scrollArea.removeEventListener('mousedown', onMouseDown);
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -232,7 +277,8 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
                     onCancel={() => setClearAnchor(null)}
                 />
             )}
-            <div className="drawing-tool-canvas-wrapper" ref={wrapperRef}>
+            <div className="drawing-tool-scroll-area" ref={scrollAreaRef}>
+            <div className="drawing-tool-canvas-wrapper" ref={wrapperRef} style={{ width, height }}>
                 {cursorPos && (
                     <span
                         className="drawing-tool-cursor-dot"
@@ -258,6 +304,7 @@ export const DrawingTool: React.FC<DrawingToolProps> = ({ initialDrawing, onDraw
                     onTouchMove={draw}
                     onTouchEnd={() => stopDrawing()}
                 />
+            </div>
             </div>
         </div>
     );

@@ -34,9 +34,12 @@ interface EncounterSidePanelProps {
   selectedPokemon?: Pokemon | null;
   onRemovePokemon?: () => void;
   onUpdatePokemon?: (pokemonId: string, updater: (p: Pokemon) => Pokemon) => void;
+  mapWidth?: number;
+  mapHeight?: number;
+  onMapSizeChange?: (width: number, height: number) => void;
 }
 
-export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange, selectedPokemon, onRemovePokemon, onUpdatePokemon }) => {
+export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, onDelete, availablePokemon = [], onAddPokemon, musicLinks = [], onMusicLinksChange, selectedPokemon, onRemovePokemon, onUpdatePokemon, mapWidth = 800, mapHeight = 600, onMapSizeChange }) => {
   const { currentLink, setCurrentLink } = useMusicContext();
   const [newUrl, setNewUrl] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -298,6 +301,35 @@ export const EncounterSidePanel: React.FC<EncounterSidePanelProps> = ({ fields, 
                 </button>
               </div>
             ))}
+          </div>
+        )}
+        {onMapSizeChange && (
+          <div className="encounter-map-size-section">
+            <label className="encounter-property-label">Map Size</label>
+            <div className="encounter-map-size-row">
+              <label className="encounter-map-size-label">W</label>
+              <input
+                type="number"
+                className="encounter-map-size-input"
+                min={100}
+                max={4000}
+                step={50}
+                value={mapWidth}
+                onChange={e => onMapSizeChange(Number(e.target.value), mapHeight)}
+                onFocus={e => e.target.select()}
+              />
+              <label className="encounter-map-size-label">H</label>
+              <input
+                type="number"
+                className="encounter-map-size-input"
+                min={100}
+                max={4000}
+                step={50}
+                value={mapHeight}
+                onChange={e => onMapSizeChange(mapWidth, Number(e.target.value))}
+                onFocus={e => e.target.select()}
+              />
+            </div>
           </div>
         )}
         {onDelete && (

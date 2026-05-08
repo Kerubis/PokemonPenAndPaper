@@ -40,7 +40,13 @@ export async function runMigrations(): Promise<void> {
         .filter(s => s.length > 0);
 
       for (const statement of statements) {
-        await connection.execute(statement);
+        try {
+          await connection.execute(statement);
+        } catch (err: any) {
+          // 1060 = ER_DUP_FIELDNAME: column already exists, safe to ignore
+          if (err?.errno === 1060) continue;
+          throw err;
+        }
       }
       console.log(`Migration applied: ${file}`);
     }

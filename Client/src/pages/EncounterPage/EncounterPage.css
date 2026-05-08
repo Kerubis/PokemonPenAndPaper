@@ -23,6 +23,8 @@
 .encounter-page-main {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   padding: 20px;
   background-color: #454545;
   position: relative;

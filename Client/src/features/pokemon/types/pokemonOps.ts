@@ -11,6 +11,7 @@ import type { PokemonType } from "./Type";
 import type { DamageType } from "./DamageType";
 import type { Pokemon, AbilityUnlock } from "./Pokemon";
 import { GAME_CONSTANTS } from "../../../lib/constants";
+import { generateUUID } from "../../../lib/utils/uuid";
 
 // ---------------------------------------------------------------------------
 // Factory
@@ -52,7 +53,7 @@ export function createPokemon(
     const maxHp = hp + level * GAME_CONSTANTS.HP_PER_LEVEL;
 
     return {
-        id: opts.id ?? crypto.randomUUID(),
+        id: opts.id ?? generateUUID(),
         pokedexEntry,
         pokemonName,
         name: opts.name ?? "",

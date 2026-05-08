@@ -10,12 +10,14 @@ export function serializeEncounter(encounter: Encounter): SerializedEncounter {
     return {
         guid: encounter.guid,
         name: encounter.name,
-        musicLinks: encounter.musicLinks,
-        pokemonGuids: encounter.pokemonGuids,
+        musicLinks: [...encounter.musicLinks],
+        pokemonGuids: [...encounter.pokemonGuids],
         story: encounter.story,
         index: encounter.index,
         finished: encounter.finished,
         mapDrawing: encounter.mapDrawing,
+        mapWidth: encounter.mapWidth,
+        mapHeight: encounter.mapHeight,
         turnOrder: encounter.turnOrder ?? undefined,
     };
 }
@@ -38,6 +40,8 @@ export function deserializeEncounter(data: SerializedEncounter): Encounter {
         index: data.index ?? 0,
         finished: data.finished ?? false,
         mapDrawing: data.mapDrawing ?? '',
+        mapWidth: data.mapWidth ?? 800,
+        mapHeight: data.mapHeight ?? 600,
         turnOrder: (data.turnOrder as TurnOrder | undefined) ?? null,
     });
 }

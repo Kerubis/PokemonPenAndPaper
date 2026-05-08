@@ -1,13 +1,15 @@
 // ============================================================
 // Singleton WebSocket connection to the game server
 // ============================================================
+import { generateUUID } from '../../../lib/utils/uuid';
 
 type PendingRequest = {
   resolve: (value: unknown) => void;
   reject: (reason: unknown) => void;
 };
 
-const WS_URL = (import.meta as any).env?.VITE_WS_URL ?? 'ws://localhost:3000/ws';
+const WS_URL = (import.meta as any).env?.VITE_WS_URL ??
+  `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws`;
 
 // Exponential-backoff reconnection constants
 const RECONNECT_BASE_MS = 1_000;
@@ -94,7 +96,7 @@ export function sendMessage<TPayload = unknown, TResponse = unknown>(
   type: string,
   payload?: TPayload,
 ): Promise<{ id: string; type: string; payload: TResponse }> {
-  const id = crypto.randomUUID();
+  const id = generateUUID();
   const raw = JSON.stringify({ id, type, payload });
 
   return new Promise((resolve, reject) => {
