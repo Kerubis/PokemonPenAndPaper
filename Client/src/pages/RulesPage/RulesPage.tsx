@@ -175,10 +175,6 @@ export const RulesPage: React.FC = () => {
             </section>
           </div>
         </div>
-
-        <div className="rules-footer">
-          Pokémon Pen &amp; Paper Rulebook
-        </div>
       </div>
     </div>
   );

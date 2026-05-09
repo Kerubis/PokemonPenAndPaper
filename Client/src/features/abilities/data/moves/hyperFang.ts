@@ -1,14 +1,14 @@
 import type { Ability } from "../../types/Ability";
 import { PokemonType } from "../../../pokemon/types/Type";
 
-export const SCRATCH_DATA: Ability = {
-  name: "Scratch",
+export const HYPER_FANG_DATA: Ability = {
+  name: "Hyper Fang",
   type: PokemonType.Normal,
-  accuracy: 60,
+  accuracy: 80,
   damageType: "Physical",
-  damage: "1d4",
+  damage: "1d10, may cause Flinch",
 };
 
 export const registration = {
-  ability: SCRATCH_DATA
+  ability: HYPER_FANG_DATA
 };

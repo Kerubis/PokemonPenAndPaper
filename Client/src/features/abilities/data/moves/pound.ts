@@ -4,7 +4,7 @@ import { PokemonType } from "../../../pokemon/types/Type";
 export const POUND_DATA: Ability = {
   name: "Pound",
   type: PokemonType.Normal,
-  accuracy: 70,
+  accuracy: 60,
   damageType: "Physical",
   damage: "1d4",
 };

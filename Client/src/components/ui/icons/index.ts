@@ -13,3 +13,4 @@ export { WalkIcon } from './WalkIcon';
 export { WaveIcon } from './WaveIcon';
 export { WingIcon } from './WingIcon';
 export { MountainIcon } from './MountainIcon';
+export { MovesIcon } from './MovesIcon';

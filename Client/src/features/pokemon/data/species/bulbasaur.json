@@ -13,6 +13,30 @@
     {
       "ability": "Constrict",
       "level": 1
+    },
+    {
+      "ability": "VineWhip",
+      "level": 6
+    },
+    {
+      "ability": "Growth",
+      "level": 8
+    },
+    {
+      "ability": "LeechSeed",
+      "level": 10
+    },
+    {
+      "ability": "RazorLeaf",
+      "level": 12
+    },
+    {
+      "ability": "PoisonPowder",
+      "level": 15
+    },
+    {
+      "ability": "SleepPowder",
+      "level": 15
     }
   ],
   "walkSpeed": 5,

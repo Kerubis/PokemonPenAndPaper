@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import './Menu.css';
-import { HomeIcon, PokeballIcon, BattleIcon, DocumentIcon, MusicIcon } from '@/components/ui/icons';
+import { HomeIcon, PokeballIcon, BattleIcon, DocumentIcon, MusicIcon, MovesIcon } from '@/components/ui/icons';
 import { useMusicContext } from '@/contexts/MusicContext';
 import { MusicEmbed } from '@/components/domain/MusicEmbed';
 
@@ -29,6 +29,9 @@ export const Menu: React.FC = () => {
         </NavLink>
       </div>
       <div className="menu-items-bottom">
+        <NavLink className={navClass} to={`${base}/Moves`} title="Moves">
+          <MovesIcon />
+        </NavLink>
         <button
           className={`menu-item menu-item-music${musicOpen ? ' active' : ''}`}
           title="Music"

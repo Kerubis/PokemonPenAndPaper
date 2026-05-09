@@ -17,6 +17,22 @@
     {
       "ability": "Ember",
       "level": 6
+    },
+    {
+      "ability": "Smokescreen",
+      "level": 8
+    },
+    {
+      "ability": "FurySwipes",
+      "level": 10
+    },
+    {
+      "ability": "DragonBreath",
+      "level": 12
+    },
+    {
+      "ability": "FlameCharge",
+      "level": 15
     }
   ],
   "walkSpeed": 5,

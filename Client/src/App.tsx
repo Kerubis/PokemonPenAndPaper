@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage'
 import { CharactersPage } from './pages/CharactersPage'
 import { EncounterPage } from './pages/EncounterPage'
 import { RulesPage } from './pages/RulesPage'
+import { MovesListPage } from './pages/MovesListPage'
 import { GamesListPage } from './pages/GamesListPage'
 import { MusicProvider } from './contexts/MusicContext'
 import { GameProvider, useGame } from './contexts/GameContext'
@@ -42,6 +43,7 @@ function AppInner() {
         <Route path="Characters/:guid" element={<CharactersPage />} />
         <Route path="Encounter" element={<EncounterPage />} />
         <Route path="Encounter/:guid" element={<EncounterPage />} />
+        <Route path="Moves" element={<MovesListPage />} />
         <Route path="Rules" element={<RulesPage />} />
       </Route>
     </Routes>

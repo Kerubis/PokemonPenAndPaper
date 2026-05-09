@@ -4,7 +4,7 @@ import { PokemonType } from "../../../pokemon/types/Type";
 export const CONSTRICT_DATA: Ability = {
   name: "Constrict",
   type: PokemonType.Normal,
-  accuracy: 90,
+  accuracy: 70,
   damageType: "Status",
   damage: "Lowers Speed by 1",
 };

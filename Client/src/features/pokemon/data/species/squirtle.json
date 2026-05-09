@@ -13,6 +13,26 @@
     {
       "ability": "TailWhip",
       "level": 1
+    },
+    {
+      "ability": "WaterGun",
+      "level": 6
+    },
+    {
+      "ability": "Withdraw",
+      "level": 8
+    },
+    {
+      "ability": "RapidSpin",
+      "level": 10
+    },
+    {
+      "ability": "Bite",
+      "level": 12
+    },
+    {
+      "ability": "WaterPulse",
+      "level": 15
     }
   ],
   "walkSpeed": 5,

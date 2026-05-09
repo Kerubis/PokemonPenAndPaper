@@ -1,0 +1,100 @@
+/* ── Wrapper & Toolbar ─────────────────────────────────────── */
+.moves-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 16px;
+}
+
+.moves-page-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  width: 210mm;
+}
+
+.moves-print-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #3a3a3a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.moves-print-btn:hover {
+  background: #555;
+}
+
+/* ── A4 paper ───────────────────────────────────────────────── */
+.moves-page {
+  width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 20px 24px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  color: #222;
+  font-family: inherit;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g fill="%23a3a3a3" opacity="0.08"><path d="M229.7 36.8A220.9 220.9 0 0 0 37.5 224.9l-.4 4.3h106.5l1.4-4.7a116.3 116.3 0 0 1 73-77.5 114.7 114.7 0 0 1 149 79l.9 3.2H475l-1.7-10.1A220 220 0 0 0 281 36.7c-12-1.4-39.3-1.4-51.2 0z"></path><path d="M239.7 185a74 74 0 0 0-49.7 40.3 73 73 0 0 0 15.4 82.3 72.1 72.1 0 0 0 101.9-1.2 68.8 68.8 0 0 0 20.6-50.7 69.1 69.1 0 0 0-21-51.2 73.3 73.3 0 0 0-33-19c-7.6-2.1-26.4-2.3-34.2-.5z"></path><path d="M37.5 286.3a220.5 220.5 0 0 0 436 4.5l1.5-8.9H367.9l-1 3.2a130 130 0 0 1-17.7 37.6 144 144 0 0 1-26.9 26.8 142 142 0 0 1-30.7 15.4 96.3 96.3 0 0 1-35.8 5.3 90 90 0 0 1-22.5-1.7 114 114 0 0 1-58.6-31.7 110.1 110.1 0 0 1-28.3-46l-2.9-8.9H37l.6 4.4h-.1z"></path></g></svg>');
+  background-size: 400px 400px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.moves-header {
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.moves-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #222;
+}
+
+.moves-subtitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* ── Card grid ──────────────────────────────────────────────── */
+.moves-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+
+/* ── Print ──────────────────────────────────────────────────── */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .moves-page-wrapper {
+    padding: 0;
+    gap: 0;
+  }
+
+  .moves-page {
+    box-shadow: none;
+    border-radius: 0;
+    min-height: 0;
+  }
+}

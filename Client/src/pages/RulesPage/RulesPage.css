@@ -226,16 +226,6 @@
   border-bottom: none;
 }
 
-/* ── Footer ─────────────────────────────────────────────────── */
-.rules-footer {
-  margin-top: 10px;
-  padding-top: 7px;
-  border-top: 1px solid #ddd;
-  font-size: 0.6rem;
-  color: #999;
-  text-align: center;
-}
-
 /* ── Print ──────────────────────────────────────────────────── */
 @media print {
   .no-print {
@@ -244,6 +234,7 @@
 
   .rules-page-wrapper {
     padding: 0;
+    gap: 0;
   }
 
   .rules-page {

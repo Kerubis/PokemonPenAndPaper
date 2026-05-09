@@ -5,7 +5,16 @@
   "type2": "",
   "flaw": "",
   "strength": "",
-  "abilityUnlocks": [],
+  "abilityUnlocks": [
+    {
+      "ability": "QuickAttack",
+      "level": 10
+    },
+    {
+      "ability": "HyperFang",
+      "level": 12
+    }
+  ],
   "walkSpeed": 5,
   "swimSpeed": 0,
   "climbSpeed": 0,

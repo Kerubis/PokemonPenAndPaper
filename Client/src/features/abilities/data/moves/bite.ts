@@ -1,14 +1,14 @@
 import type { Ability } from "../../types/Ability";
 import { PokemonType } from "../../../pokemon/types/Type";
 
-export const SCRATCH_DATA: Ability = {
-  name: "Scratch",
-  type: PokemonType.Normal,
-  accuracy: 60,
+export const BITE_DATA: Ability = {
+  name: "Bite",
+  type: PokemonType.Dark,
+  accuracy: 80,
   damageType: "Physical",
-  damage: "1d4",
+  damage: "1d8, may cause Flinch",
 };
 
 export const registration = {
-  ability: SCRATCH_DATA
+  ability: BITE_DATA
 };
